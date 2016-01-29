@@ -3,14 +3,22 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
 
 #include "TFile.h"
+#include "TF1.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TGraphErrors.h"
+#include "TLegend.h"
 #include "TTree.h"
-
+#include "TCanvas.h"
+#include "TGraph.h"
+#include "TMultiGraph.h"
 #include "TMath.h"
+#include "TSystem.h"
+#include "TStyle.h"
+
+using namespace std;
 
 //TString myname;
 Char_t cTemp[500]; 
@@ -18,25 +26,19 @@ Char_t cTemp2[500];
 Char_t cTemp3[500];
 
 fstream file; //This is the iostream for reading the file
-//char* filename;
 
 //Output HTML file for viewing results
 ofstream OutHtml;
-Char_t *cDirOut = "output";
-//Char_t *cDirOut;
+string cDirOut;
 
 int PedRange[4][100];
 int PedMant[4][100];
 int PedCIDCount[4];
 
-//int PEDtestread[64][21];
-//int CAPPEDtestread[16][21];
-
 int PEDtestRange[64][129];
 int PEDtestMant[64][129];
 int CAPPEDtestRange[16][4][50];
 int CAPPEDtestMant[16][4][50];
-//int CAPPedtestCapId[16][21];
 int CAPPEDtestCount[16][4];
 
 double PedDac[63];
@@ -85,7 +87,7 @@ double Up[4][4][63];
 double Down[4][4][63];
 
 // DCH: dummy array for plotting:
-double index[4][62];
+double index_[4][62];
 double index_Up[4][63];
 double index_Dn[4][63];
 
@@ -95,7 +97,7 @@ double Width[4][4][62];
 
 bool isRange01;
 
-TCanvas c1*;
+TCanvas* c1;
 
 TGraph* RangePlot[4][4];
 TGraph* RangePlot_Up[4][4];
@@ -147,7 +149,59 @@ TH1F* Pulse[255];
 
 TLegend* myLeg;
 
-void doPedTest(char* myfile, char* cPathOut="output/newPed") {
+// forward-declarations
+bool storePed(fstream &file);
+void saveFile(TCanvas *c1,const string& cStrSave, const string& cHeader, double width = 200, bool table = kTRUE );
+bool storeADC(fstream &file);
+bool storeTDC(fstream &file);
+double LookupDAQ(int DAC, int whichRange);
+double LookupCharge(int range, int mantissa);
+
+
+//This function is used to read data from the file opened file
+//It makes the assumption that every line contains two columns
+//The first contains the line number, this increments by one
+//The second contains some data of interest.
+//The function checks that the data follows this format, if it does, it returns false
+bool readline(fstream &file, int &linenumber, string &data, int &previousline){
+  file >> dec >> linenumber;
+  //file >> linenumber;
+  file >> data;
+
+  //if(linenumber != (previousline + 1)){
+    //#ifdef debugstore
+    //cout << "Expected :"<<(previousline+1)<<" Read: "<<linenumber << endl;
+    //#endif
+    //return 0;
+  //}
+  
+  //previousline = linenumber;
+  
+  return true;
+}
+
+bool readline_cap(fstream &file, int &linenumber, string &data, int &previousline){
+ 
+  string junk;
+
+  file >> dec >> linenumber;
+  file >> junk;
+  file >> data;
+
+  //if(linenumber != (previousline + 1)){
+    //#ifdef debugstore
+    //cout << "Expected :"<<(previousline+1)<<" Read: "<<linenumber << endl;
+    //#endif
+    //return 0;
+  //}
+  
+  previousline = linenumber;
+  
+  return true;
+}
+
+
+void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   
   //Set output path for saving multiple chips
   cDirOut = cPathOut;
@@ -168,8 +222,8 @@ void doPedTest(char* myfile, char* cPathOut="output/newPed") {
   file.close();
 
   //DCH setup the ouput file
-  gSystem->mkdir(cDirOut, kTRUE);
-  sprintf(cTemp,"%s/index.html",cDirOut);
+  gSystem->mkdir(cDirOut.c_str(), kTRUE);
+  sprintf(cTemp,"%s/index.html",cDirOut.c_str());
   OutHtml.open(cTemp);
   
   c1 = new TCanvas("c1","",900,900);
@@ -337,9 +391,9 @@ void doPedTest(char* myfile, char* cPathOut="output/newPed") {
   CAPPedGraph_3->SetTitle("CapID 3 Pedestal DAC Test; CapID Pedestal DAC; Pedestal (mantissa)");
 
 
-  PedFitLo = new TF1("pedFitLo","pol1",-21,-9);
+  TF1* PedFitLo = new TF1("pedFitLo","pol1",-21,-9);
   PedFitLo->SetLineColor(kRed);
-  PedFitHi = new TF1("pedFitHi","pol1",6, 18);
+  TF1* PedFitHi = new TF1("pedFitHi","pol1",6, 18);
   PedFitHi->SetLineColor(kRed);
 
   PedGraph->Fit(PedFitLo,"RQ+");
@@ -353,7 +407,7 @@ void doPedTest(char* myfile, char* cPathOut="output/newPed") {
   OutHtml << "" << endl;
   OutHtml << "<TR align='center'> <TD align='center' colspan=2><b> Global Pedestals DAC </b></TD></TR>"<< endl;
   OutHtml << "<TR align='center'><TD></TD>" << endl;
-  saveFile(c1,"PedestalDac","", 400);    
+  saveFile(c1," PedestalDac", "", 400);    
   OutHtml << "</TR>" << endl;
   OutHtml << "<TR align='center'><TD> Slope Lo</TD><TD>" << PedFitLo->GetParameter(1) << " +/- " << PedFitLo->GetParError(1) << "</TD></TR>" << endl;
   OutHtml << "<TR align='center'><TD> ~fC/bin (target: ~3)</TD><TD>" << 2/PedFitLo->GetParameter(1) << "</TD></TR>" << endl;
@@ -512,7 +566,7 @@ void doPedTest(char* myfile, char* cPathOut="output/newPed") {
 }
 
 
-void doADCTest(char* myfile, char* cPathOut="output/newADC") {
+void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   
   //Set output path for saving multiple chips
   cDirOut = cPathOut;
@@ -572,7 +626,7 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
     for(int j=0; j<4; j++) {
       for(int i = 0; i < 63; i++) {
 	if(k==0) {
-	  if(i<62) index[j][i] = i+(64*j)+1;
+	  if(i<62) index_[j][i] = i+(64*j)+1;
 	  index_Up[j][i] = i+(64*j)+1;
 	  index_Dn[j][i] = i+(64*j);
 	}
@@ -589,8 +643,8 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
   }
 
   //DCH setup the ouput file
-  gSystem->mkdir(cDirOut, kTRUE);
-  sprintf(cTemp,"%s/index.html",cDirOut);
+  gSystem->mkdir(cDirOut.c_str(), kTRUE);
+  sprintf(cTemp,"%s/index.html",cDirOut.c_str());
   OutHtml.open(cTemp);
 
   OutHtml << "<HTML>" << endl;
@@ -612,11 +666,11 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
 
   for(int  i=0; i<4; i++) {
     for(int j=0; j<4; j++) {
-      RangePlot[i][j] = new TGraph(62, index[0], Mid[i][j]);
+      RangePlot[i][j] = new TGraph(62, index_[0], Mid[i][j]);
       RangePlot_Up[i][j] = new TGraph(63, index_Up[0], Up[i][j]);
       RangePlot_Dn[i][j] = new TGraph(63, index_Dn[0], Down[i][j]);
 
-      RangePlot_stagger[i][j] = new TGraph(62, index[j], Mid[i][j]);
+      RangePlot_stagger[i][j] = new TGraph(62, index_[j], Mid[i][j]);
       RangePlot_Up_stagger[i][j] = new TGraph(63, index_Up[j], Up[i][j]);
       RangePlot_Dn_stagger[i][j] = new TGraph(63,index_Dn[j], Down[i][j]);
       //    }
@@ -829,13 +883,13 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
   for(int i=0; i<4; i++) {
     for(int j=0; j<4; j++) {
       OutHtml << "<TR align='center'><TD align='center'> R " << i << ", Sub " << j << "</TD>";
-      for(k=0;k<4;k++) {
+      for(int k=0;k<4;k++) {
 	OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetChisquare() << "/" << setprecision(0) << SubRangeFit[k][i][j]->GetNDF() << "</TD>";
       }
-      for(k=0;k<4;k++) {
+      for(int k=0;k<4;k++) {
 	OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetParameter(1) << " +/- " << SubRangeFit[k][i][j]->GetParError(1) << "</TD>";
       }
-      for(k=0;k<4;k++) {
+      for(int k=0;k<4;k++) {
 	OutHtml << "<TD>" << fixed << setprecision(1) << SubRangeFit[k][i][j]->GetParameter(0) << " +/- " << SubRangeFit[k][i][j]->GetParError(0) << "</TD>";
       }
       OutHtml << "</TR>" << endl;
@@ -1058,7 +1112,7 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
     best = 1000.;
     avg = 0;
 
-    for(j=1; j<3; j++) {
+    for(int j=1; j<3; j++) {
       for(int i=0; i<4; i++) {
 	if(fabs(Width[i][j][k]/average[i][j][pickRange] - 1) < fabs(best)) {
 	  best = Width[i][j][k]/average[i][j][pickRange] - 1;
@@ -1230,55 +1284,9 @@ void doADCTest(char* myfile, char* cPathOut="output/newADC") {
   
 }
 
-//This function is used to read data from the file opened file
-//It makes the assumption that every line contains two columns
-//The first contains the line number, this increments by one
-//The second contains some data of interest.
-//The function checks that the data follows this format, if it does, it returns false
-bool readline(fstream &file, int &linenumber, string &data, int &previousline){
- 
-  file >> dec >> linenumber;
-  //file >> linenumber;
-  file >> data;
 
-  //if(linenumber != (previousline + 1)){
-    //#ifdef debugstore
-    //cout << "Expected :"<<(previousline+1)<<" Read: "<<linenumber << endl;
-    //#endif
-    //return 0;
-  //}
-  
-  //previousline = linenumber;
-  
-  return 1;
 
-  //End ADC Test
-}
-
-bool readline_cap(fstream &file, int &linenumber, string &data, int &previousline){
- 
-  string junk;
-
-  file >> dec >> linenumber;
-  file >> junk;
-  file >> data;
-
-  //if(linenumber != (previousline + 1)){
-    //#ifdef debugstore
-    //cout << "Expected :"<<(previousline+1)<<" Read: "<<linenumber << endl;
-    //#endif
-    //return 0;
-  //}
-  
-  previousline = linenumber;
-  
-  return 1;
-
-  //End ADC Test
-
-}
-
-void doTDCTest(char* myfile, char* cPathOut="output/TDCrecent") {
+void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
 
   //Set output path for saving multiple chips
   cDirOut = cPathOut;
@@ -1340,8 +1348,8 @@ void doTDCTest(char* myfile, char* cPathOut="output/TDCrecent") {
   }
 
   //DCH setup the ouput file
-  gSystem->mkdir(cDirOut, kTRUE);
-  sprintf(cTemp,"%s/index.html",cDirOut);
+  gSystem->mkdir(cDirOut.c_str(), kTRUE);
+  sprintf(cTemp,"%s/index.html",cDirOut.c_str());
   OutHtml.open(cTemp);
 
   OutHtml << "<HTML>" << endl;
@@ -1397,12 +1405,6 @@ void doTDCTest(char* myfile, char* cPathOut="output/TDCrecent") {
       //if(delay>0) if(((inTDC[delay] > (5 + inTDC[delay-1])) && (inTDC[delay-1] > 0 ))|| ((inTDC[delay] > (5 + inTDC[delay+1])) && (inTDC[delay+1] > 0 ))) inTDC[delay] -= 8;
       //if(delay>0) if(inTDC[delay] < (5 + inTDC[delay-1]) && (inTDC[delay-1] > 0)) inTDC[delay] += 8;
 
-
-
-      //break;
-      
-      
-      
     }
     
     if(!found) cout << "Error, no pulse seen." << endl;
@@ -1635,10 +1637,10 @@ void doTDCTest(char* myfile, char* cPathOut="output/TDCrecent") {
   BinSum5 = new TH1F("BinSum5","",25, Sum5Avg - (maxSum5Diff+100), Sum5Avg + (maxSum5Diff+100));
   //BinSum4 = new TH1F("BinSum4","",100, 000, 10000);
 
-  DNLSum2Plot = new TH1F("DNLSum2Plot","",25, -.5, .5);
-  DNLSum3Plot = new TH1F("DNLSum3Plot","",25, -.5, .5);
-  DNLSum4Plot = new TH1F("DNLSum4Plot","",25, -.5, .5);
-  DNLSum5Plot = new TH1F("DNLSum5Plot","",25, -.5, .5);
+  TH1F* DNLSum2Plot = new TH1F("DNLSum2Plot","",25, -.5, .5);
+  TH1F* DNLSum3Plot = new TH1F("DNLSum3Plot","",25, -.5, .5);
+  TH1F* DNLSum4Plot = new TH1F("DNLSum4Plot","",25, -.5, .5);
+  TH1F* DNLSum5Plot = new TH1F("DNLSum5Plot","",25, -.5, .5);
 
 
   for(int i=0; i<255; i++) {
@@ -1746,7 +1748,7 @@ void doTDCTest(char* myfile, char* cPathOut="output/TDCrecent") {
     for( int j=0; j<6; j++ ) {
 
       if((i != 42) || (i== 42 && j < 3)) {
-	c1.cd();
+	c1->cd();
 	Pulse[6*i+j]->Draw();
 	
 	sprintf(cTemp2,"Pulse_%d",i*6+j+1);
@@ -2189,15 +2191,15 @@ bool storeTDC(fstream &file)
    return 1;
 }
 
-void saveFile(TCanvas *c1,Char_t *cStrSave, Char_t *cHeader, double width = 200, bool table = kTRUE ){ 
+void saveFile(TCanvas *c1, const string& cStrSave, const string& cHeader, double width, bool table ){ 
   
 
   if(table) OutHtml<<"<TD  align='center'>"<< endl;
   if(table) OutHtml<<cHeader<<endl;
   OutHtml<<"<BR>"<<endl;
-  sprintf(cTemp,"%s/%s.gif",cDirOut,cStrSave);
+  sprintf(cTemp,"%s/%s.gif",cDirOut.c_str(),cStrSave.c_str());
   c1->Print(cTemp,"gif");
-  sprintf(cTemp,"%s.gif",cStrSave);
+  sprintf(cTemp,"%s.gif",cStrSave.c_str());
   OutHtml<< "<A href=\""<<cTemp<<"\">"<<endl;
   //if(table)OutHtml <<"<img align='center' id=\""<<cTemp<<"\" name=\""<<cTemp<<"\" src=\""<<cTemp<<"\" alt=\"Click\" width='200' height='200' > " <<endl;
   if(table)OutHtml <<"<img align='center' id=\""<<cTemp<<"\" name=\""<<cTemp<<"\" src=\""<<cTemp<<"\" alt=\"Click\" width='" << width << "' height='" << width << "' > " <<endl;
@@ -2205,16 +2207,16 @@ void saveFile(TCanvas *c1,Char_t *cStrSave, Char_t *cHeader, double width = 200,
   OutHtml<< "</A>" << endl;
   
   OutHtml<<"<BR>"<<endl;
-  sprintf(cTemp,"%s/%s.pdf",cDirOut,cStrSave);
+  sprintf(cTemp,"%s/%s.pdf",cDirOut.c_str(),cStrSave.c_str());
   c1->Print(cTemp,"pdf");
-  sprintf(cTemp,"%s.pdf",cStrSave);
+  sprintf(cTemp,"%s.pdf",cStrSave.c_str());
   OutHtml<< "<A href=\""<<cTemp<<"\">"<<endl;
   OutHtml <<"(.pdf)"<<endl;
   OutHtml<< "</A>" << endl;
 
-  sprintf(cTemp,"%s/%s.C",cDirOut,cStrSave);
+  sprintf(cTemp,"%s/%s.C",cDirOut.c_str(),cStrSave.c_str());
   c1->Print(cTemp,"cxx");
-  sprintf(cTemp,"%s.C",cStrSave);
+  sprintf(cTemp,"%s.C",cStrSave.c_str());
   OutHtml<< "<A href=\""<<cTemp<<"\">"<<endl;
   OutHtml <<"(.C)"<<endl;
   OutHtml<< "</A>" << endl;
@@ -2345,7 +2347,7 @@ double LookupDAQ(int DAC, int whichRange) {
 }
 
 ///
-void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
+void doNewErrorTest(char* myfile, const string& cPathOut="output/newErr")
 {
 
   //Set output path for saving multiple chips
@@ -2360,8 +2362,8 @@ void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
   }
   
   //DCH setup the ouput file
-  gSystem->mkdir(cDirOut, kTRUE);
-  sprintf(cTemp,"%s/index.html",cDirOut);
+  gSystem->mkdir(cDirOut.c_str(), kTRUE);
+  sprintf(cTemp,"%s/index.html",cDirOut.c_str());
   OutHtml.open(cTemp);
   
   c1 = new TCanvas("c1","",900,900);
@@ -2514,7 +2516,7 @@ void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
   OutHtml << "" << endl;
   //OutHtml << "<TR align='center'><TD align='center'> Response </TD><TD>DNL</TD></TR>" << endl;
 
-  c1.cd();
+  c1->cd();
   //OutHtml << "<TR>"<< endl;
   //Pulse[6*i+j]->Draw();
   //Cap0_err_R01.Draw("AP");
@@ -2528,16 +2530,16 @@ void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
   
   Avg_err_R01.Draw("AP");
   saveFile(c1,"Avg_R01","");
-  c1.cd();
+  c1->cd();
   Cap0_err_R01.Draw("AP");
   saveFile(c1,"CID0_R01","");
-  c1.cd();
+  c1->cd();
   Cap1_err_R01.Draw("AP");
   saveFile(c1,"CID1_R01","");
-  c1.cd();
+  c1->cd();
   Cap2_err_R01.Draw("AP");
   saveFile(c1,"CID2_R01","");
-  c1.cd();
+  c1->cd();
   Cap3_err_R01.Draw("AP");
   saveFile(c1,"CID3_R01","");
   
@@ -2545,19 +2547,19 @@ void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
   
   OutHtml << "<TR>"<< endl;
   
-  c1.cd();
+  c1->cd();
   Avg_err_R12.Draw("AP");
   saveFile(c1,"Avg_R12","");
-  c1.cd();
+  c1->cd();
   Cap0_err_R12.Draw("AP");
   saveFile(c1,"CID0_R12","");
-  c1.cd();
+  c1->cd();
   Cap1_err_R12.Draw("AP");
   saveFile(c1,"CID1_R12","");
-  c1.cd();
+  c1->cd();
   Cap2_err_R12.Draw("AP");
   saveFile(c1,"CID2_R12","");
-  c1.cd();
+  c1->cd();
   Cap3_err_R12.Draw("AP");
   saveFile(c1,"CID3_R12","");
   
@@ -2565,19 +2567,19 @@ void doNewErrorTest(char* myfile, char* cPathOut="output/newErr")
   
   OutHtml << "<TR>"<< endl;
   
-  c1.cd();
+  c1->cd();
   Avg_err_R23.Draw("AP");
   saveFile(c1,"Avg_R23","");
-  c1.cd();
+  c1->cd();
   Cap0_err_R23.Draw("AP");
   saveFile(c1,"CID0_R23","");
-  c1.cd();
+  c1->cd();
   Cap1_err_R23.Draw("AP");
   saveFile(c1,"CID1_R23","");
-  c1.cd();
+  c1->cd();
   Cap2_err_R23.Draw("AP");
   saveFile(c1,"CID2_R23","");
-  c1.cd();
+  c1->cd();
   Cap3_err_R23.Draw("AP");
   saveFile(c1,"CID3_R23","");
   
@@ -3066,23 +3068,23 @@ void doErrorTest_AlScan(char* myfile, char* myoutput, bool printToScreen = 0, co
   file >> junk;
 
   while(data != "capid_test"){
-    if(!readline(file,linenumber,data,previousline)) return 0;
+    if(!readline(file,linenumber,data,previousline)) return;
     //cout << data << endl;
   } 
   readline(file,linenumber,data,previousline);
   readline(file,linenumber,data,previousline);
   readline(file,linenumber,data,previousline);
   
-  int temp;
+  int temp1;
 
   for(int loop = 0; loop <125; loop++) {
     
     readline(file,linenumber,data,previousline);
 
-    temp = strtol(data.c_str(),NULL,16);
+    temp1 = strtol(data.c_str(),NULL,16);
 
-    PedAvg[(temp & 0xC000) >> 14] += ((temp & 0x00C0)>>6)*64 + (temp & 0x003F);
-    PedCount[(temp & 0XC000)>>14]++;
+    PedAvg[(temp1 & 0xC000) >> 14] += ((temp1 & 0x00C0)>>6)*64 + (temp1 & 0x003F);
+    PedCount[(temp1 & 0XC000)>>14]++;
 
   }
    
@@ -3190,7 +3192,7 @@ void doErrorTest_AlScan(char* myfile, char* myoutput, bool printToScreen = 0, co
 	    << endl;
 
     while(data != "mant_test_errors"){
-      if(!readline(file,linenumber,data,previousline)) return 0;
+      if(!readline(file,linenumber,data,previousline)) return;
     }  
   
     for(int i=0; i<numPoints; i++) {
@@ -3614,7 +3616,7 @@ void doErrorTest_AlScan_loop(char* myfile, char* myoutput, bool printToScreen = 
 
   TH2D ErrorRateVsGaus("ErrorRateVsGaus","Max Error Rate vs Max Gaus Amp",500, 0, 1, 500, 0, 1);
 
-  TH1F FillChipError("FullChipError","Full Chip Error Rate",1000, 0, 0.001);
+  TH1F FullChipError("FullChipError","Full Chip Error Rate",1000, 0, 0.001);
 
   whichError_1.GetXaxis()->SetBinLabel(1, "Good");
   whichError_1.GetXaxis()->SetBinLabel(2, "R01 Error");
@@ -3737,23 +3739,23 @@ void doErrorTest_AlScan_loop(char* myfile, char* myoutput, bool printToScreen = 
       file >> junk;
       
       while(data != "capid_test"){
-	if(!readline(file,linenumber,data,previousline)) return 0;
+	if(!readline(file,linenumber,data,previousline)) return;
 	//cout << data << endl;
       } 
       readline(file,linenumber,data,previousline);
       readline(file,linenumber,data,previousline);
       readline(file,linenumber,data,previousline);
       
-      int temp;
+      int temp1;
       
       for(int loop = 0; loop <125; loop++) {
 	
 	readline(file,linenumber,data,previousline);
 	
-	temp = strtol(data.c_str(),NULL,16);
+	temp1 = strtol(data.c_str(),NULL,16);
 	
-	PedAvg[(temp & 0xC000) >> 14] += ((temp & 0x00C0)>>6)*64 + (temp & 0x003F);
-	PedCount[(temp & 0XC000)>>14]++;
+	PedAvg[(temp1 & 0xC000) >> 14] += ((temp1 & 0x00C0)>>6)*64 + (temp1 & 0x003F);
+	PedCount[(temp1 & 0XC000)>>14]++;
 	
       }
       
@@ -3860,7 +3862,7 @@ void doErrorTest_AlScan_loop(char* myfile, char* myoutput, bool printToScreen = 
 	//	    << endl;
 	
 	while(data != "mant_test_errors"){
-	  if(!readline(file,linenumber,data,previousline)) return 0;
+	  if(!readline(file,linenumber,data,previousline)) return;
 	}  
 	
 	for(int i=0; i<numPoints; i++) {

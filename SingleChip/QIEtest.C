@@ -307,7 +307,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
     PedAvg[ped-1] /= 129;
     
     PedStd[ped-1] = 0;
-    
     for(int read=0; read<129; read++) {
       PedStd[ped-1] += pow((PEDtestRange[ped][read]*64 + PEDtestMant[ped][read]) - PedAvg[ped-1],2);
     }
@@ -316,12 +315,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
 
     if(PedStd[ped-1] == 0) PedStd[ped-1] = 1/sqrt(12);
   }
-  
-  
-  
-  //for (int i=0; i<63; i++) {
-  //cout << "PedDac: " << PedDac[i] << ", Ped: " << PedAvg[i] << endl;
-  //}
   
   for(int ped = 0; ped < 15; ped++) {
     if((ped+1) > 7) CAPPedDac[ped] = (ped+1) - 8;
@@ -335,7 +328,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
       CAPPedAvg[i][ped] /= CAPPEDtestCount[ped][i];
       
       CAPPedStd[i][ped] = 0;
-      
       for(int read=0; read<CAPPEDtestCount[ped][i]; read++) {
 	CAPPedStd[i][ped] += pow((CAPPEDtestRange[ped][i][read]*64 + CAPPEDtestMant[ped][i][read]) - CAPPedAvg[i][ped],2);
       }
@@ -348,16 +340,11 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   }
   
   PedGraph = new TGraphErrors(63, PedDac, PedAvg, NULL, PedStd);
-  //PedGraph = new TGraphErrors(63, PedDac, PedAvg, NULL, NULL);
 
   CAPPedGraph_0 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[0], NULL, CAPPedStd[0]);
   CAPPedGraph_1 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[1], NULL, CAPPedStd[1]);
   CAPPedGraph_2 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[2], NULL, CAPPedStd[2]);
   CAPPedGraph_3 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[3], NULL, CAPPedStd[3]);
-  //CAPPedGraph_0 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[0], NULL, NULL);
-  //CAPPedGraph_1 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[1], NULL, NULL);
-  //CAPPedGraph_2 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[2], NULL, NULL);
-  //CAPPedGraph_3 = new TGraphErrors(15, CAPPedDac, CAPPedAvg[3], NULL, NULL);
   
   PedGraph->SetMarkerStyle(21);
   CAPPedGraph_0->SetMarkerStyle(21); 
@@ -372,24 +359,11 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   CAPPedGraph_2->SetMarkerColor(kBlue); 
   CAPPedGraph_3->SetMarkerColor(kBlue); 
 
-  //PedGraph->SetLineColor(kBlue);
-
-  //CAPPedGraph_0->SetMinimum(0);
-  //CAPPedGraph_1->SetMinimum(0);  
-  //CAPPedGraph_2->SetMinimum(0);
-  //CAPPedGraph_3->SetMinimum(0);
- 
-  //CAPPedGraph_0->SetMaximum(12);
-  //CAPPedGraph_1->SetMaximum(12);
-  //CAPPedGraph_2->SetMaximum(12);
-  //CAPPedGraph_3->SetMaximum(12);
-
   PedGraph->SetTitle("Pedestal DAC Test; Global Pedestal DAC; Pedestal (mantissa)");
   CAPPedGraph_0->SetTitle("CapID 0 Pedestal DAC Test; CapID Pedestal DAC; Pedestal (mantissa)");
   CAPPedGraph_1->SetTitle("CapID 1 Pedestal DAC Test; CapID Pedestal DAC; Pedestal (mantissa)");
   CAPPedGraph_2->SetTitle("CapID 2 Pedestal DAC Test; CapID Pedestal DAC; Pedestal (mantissa)");
   CAPPedGraph_3->SetTitle("CapID 3 Pedestal DAC Test; CapID Pedestal DAC; Pedestal (mantissa)");
-
 
   TF1* PedFitLo = new TF1("pedFitLo","pol1",-21,-9);
   PedFitLo->SetLineColor(kRed);
@@ -429,7 +403,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   CAPPedGraph_1->Fit(CAPPedFit_1,"RQ+");
   CAPPedGraph_2->Fit(CAPPedFit_2,"RQ+");
   CAPPedGraph_3->Fit(CAPPedFit_3,"RQ+");
-
 
   OutHtml << "<h3> CapID Pedestal DAC Study </h3>" << endl;
 
@@ -560,9 +533,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   OutHtml << "" << endl;
 
   OutHtml.close();
-
-  //cleanUp();
-
 }
 
 
@@ -599,21 +569,13 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   //}
 
   //Now, we use the lookup table to convert DAQ setting to charge
-  for (int i=0; i<4; i++){
-    for (int j=0; j<4; j++) {
-      for (int k=0; k<64; k++) {
+  for (int i=0; i<4; ++i){ // capid
+    for (int j=0; j<4; ++j) { // range 
+      for (int k=0; k<64; ++k) { // bin
 	
-	if( j < 2) isRange01=kTRUE;
-	else isRange01=kFALSE;
-	
-	//Up_work[i][j][k] = LookupDAQ(UpDAQ[i][j][k],isRange01);
-	//Down_work[i][j][k] = LookupDAQ(DownDAQ[i][j][k],isRange01);
 	Up_work[i][j][k] = LookupDAQ(UpDAQ[i][j][k],j);
 	Down_work[i][j][k] = LookupDAQ(DownDAQ[i][j][k],j);
 
-	//Test for DAC_vs_Q conversion
-	//Up_work[i][j][k] = UpDAQ[i][j][k];
-	//Down_work[i][j][k] = DownDAQ[i][j][k];
       }
     }
   }
@@ -622,9 +584,9 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   // DCH: We use the "work" vectors because the last bin of 
   //      ramping down and the first bin of ramping up is garbage.
   //      Up and Down will be 63 element vectors and Mid/Width's will be 62.
-  for(int k=0; k<4; k++) {
-    for(int j=0; j<4; j++) {
-      for(int i = 0; i < 63; i++) {
+  for(int k=0; k<4; ++k) {
+    for(int j=0; j<4; ++j) {
+      for(int i = 0; i < 63; ++i) {
 	if(k==0) {
 	  if(i<62) index_[j][i] = i+(64*j)+1;
 	  index_Up[j][i] = i+(64*j)+1;
@@ -664,8 +626,8 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   c1 = new TCanvas("c1","",900,900);
   c1->SetLeftMargin(0.15);
 
-  for(int  i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
+  for(int  i=0; i<4; ++i) {
+    for(int j=0; j<4; ++j) {
       RangePlot[i][j] = new TGraph(62, index_[0], Mid[i][j]);
       RangePlot_Up[i][j] = new TGraph(63, index_Up[0], Up[i][j]);
       RangePlot_Dn[i][j] = new TGraph(63, index_Dn[0], Down[i][j]);
@@ -673,11 +635,7 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
       RangePlot_stagger[i][j] = new TGraph(62, index_[j], Mid[i][j]);
       RangePlot_Up_stagger[i][j] = new TGraph(63, index_Up[j], Up[i][j]);
       RangePlot_Dn_stagger[i][j] = new TGraph(63,index_Dn[j], Down[i][j]);
-      //    }
 
-      //}
-      //for(int i=0; i<4; i++) {
-      //for(int j=0; j<4; j++) {
       RangePlot[i][j]->SetMarkerStyle(33);
       RangePlot_Up[i][j]->SetMarkerStyle(23);
       RangePlot_Dn[i][j]->SetMarkerStyle(22);
@@ -687,8 +645,6 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
       cout << "i: " << i << ", j: " << j << ", cTemp: " << cTemp << endl;
       RangePlot[i][j]->SetTitle(cTemp);
       
-      //RangePlot[i][j]->SetLabelOffset(0.1,"Y");
-
       RangePlot_stagger[i][j]->SetMarkerStyle(33);
       RangePlot_Up_stagger[i][j]->SetMarkerStyle(23);
       RangePlot_Dn_stagger[i][j]->SetMarkerStyle(22);
@@ -701,16 +657,14 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
     }
   }
 
-
-
-  for(int i=0; i<4; i++) {
+  for(int i=0; i<4; ++i) {
     allRanges[i] = new TMultiGraph();
     allRanges_Up[i] = new TMultiGraph();
     allRanges_Dn[i] = new TMultiGraph(); 
   }
 
-  for(int j=0; j< 4; j++){
-    for(int i=0; i< 4; i++) {
+  for(int j=0; j<4; ++j){
+    for(int i=0; i<4; ++i) {
       allRanges[j]->Add(RangePlot_stagger[j][i]);
       allRanges_Up[j]->Add(RangePlot_Up_stagger[j][i]);
       allRanges_Dn[j]->Add(RangePlot_Dn_stagger[j][i]);
@@ -718,14 +672,11 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
       if(j==0) {
 	sprintf(cTemp,"CapID%d; ; Charge (fC)",i);
 	allRanges[i]->SetTitle(cTemp);
-	//allRanges[i]->SetLabelOffset(0.1,"Y");
-
       } 
    }
   }
 
-
-  for(int i=0; i<4; i++) {
+  for(int i=0; i<4; ++i) {
     sprintf(cTemp, "CapID%d_FullRange", i);
     Ranges[i] = new TCanvas(cTemp, cTemp, 900,900);
     sprintf(cTemp, "CapID%d_Ranges", i);
@@ -740,9 +691,8 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   OutHtml << "<TD align='center'> Full Range </TD>" << endl;
   
 
-  for(int i=0; i<4; i++) {
-        
-    Ranges[i]->cd(0);
+  for(int i=0; i<4; ++i) {
+    Ranges[i]->cd();
     Ranges[i]->SetLeftMargin(0.15);
     allRanges[i]->Draw("AP");
     //cout << allRanges[i]->GetXaxis()->GetNbins() << endl;
@@ -775,7 +725,7 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
     //
     //allRanges[i]->GetXaxis()->SetNdivisions(405);
 
-    gPad->Modified();
+    //gPad->Modified();
     
     allRanges_Up[i]->Draw("P");
     allRanges_Dn[i]->Draw("P");
@@ -786,7 +736,7 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
     saveFile(Ranges[i],cTemp2,cTemp3);    
 
     SubRanges[i]->Divide(2,2);
-    for(int j=0; j<4; j++){
+    for(int j=0; j<4; ++j){
       SubRanges[i]->cd(j+1);
       RangePlot[i][j]->Draw("AP");
       RangePlot_Up[i][j]->Draw("P");
@@ -798,10 +748,9 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   OutHtml << "<TR align='center'> <TD align='center' colspan=5><b> Individual Range View </b></TD></TR>"<< endl;
 
   c1->cd();
-  for (int j=0; j<4; j++) {
-
+  for (int j=0; j<4; ++j) {
     OutHtml << "<TR align='center'> <TD align='center'> Range " << j << "</TD>" << endl;
-    for(int i=0; i<4; i++) {
+    for(int i=0; i<4; ++i) {
       RangePlot[i][j]->GetHistogram()->SetTitleOffset(1.8,"Y");
 
       RangePlot[i][j]->Draw("AP");
@@ -1216,10 +1165,6 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
     OutHtml << "</TR>" << endl;
   }
 
- 
-  
-
- 
   //DCH: Ok, do this for midpoints too.
 
 
@@ -2007,9 +1952,7 @@ bool storeADC(fstream &file)
 
   int linenumber = 0; //This tracks the line number of the file
   string data; //This is the data contained on the line
-
   int previousline = 0;//We use this to check the consistency of the data file
-
   stringstream teststring; //We use this to check if we have the format that we expect
 
   //Now we loop through the data until we find the start of the ramping process
@@ -2019,7 +1962,7 @@ bool storeADC(fstream &file)
   }
   // The loops below assign to each element in the string arrays the appropriate element from the file for downDAQ. 
   // Then, converts the hexadecimal strings over to decimal integers in the integer arrays.
-  for(int cap=0; cap<=3; cap++){
+  for(int cap=0; cap<=3; ++cap){
 
     if(!readline(file,linenumber,data,previousline)) return 0;
 
@@ -2033,7 +1976,7 @@ bool storeADC(fstream &file)
 	return 0;
       }
 
-    for(int range=0; range<=3; range++){
+    for(int range=0; range<=3; ++range){
 
       if(!readline(file,linenumber,data,previousline)) return 0;
       
@@ -2047,7 +1990,7 @@ bool storeADC(fstream &file)
 	return 0;
       }
 
-      for(int bin=0; bin<=63; bin++){
+      for(int bin=0; bin<=63; ++bin){
 	if(!readline(file,linenumber,data,previousline)) return 0;
 
 	istringstream(data) >> hex >> DownDAQ[cap][range][bin];
@@ -2069,7 +2012,7 @@ bool storeADC(fstream &file)
   }
   // The loops below assign to each element in the string arrays the appropriate element from the file for upDAQ. 
   // Then, converts the hexadecimal strings over to decimal integers in the integer arrays.
-  for(int cap=0; cap<=3; cap++){
+  for(int cap=0; cap<=3; ++cap){
 
     if(!readline(file,linenumber,data,previousline)) return 0;
 
@@ -2083,7 +2026,7 @@ bool storeADC(fstream &file)
 	return 1;
       }
 
-    for(int range=0; range<=3; range++){
+    for(int range=0; range<=3; ++range){
 
       if(!readline(file,linenumber,data,previousline)) return 0;
       
@@ -2097,7 +2040,7 @@ bool storeADC(fstream &file)
 	return 0;
       }
 
-      for(int bin=0; bin<=63; bin++){
+      for(int bin=0; bin<=63; ++bin){
 	if(!readline(file,linenumber,data,previousline)) return 0;
 	istringstream(data) >> hex >> UpDAQ[cap][range][bin];
 	//#ifdef debugstore  
@@ -2192,7 +2135,6 @@ bool storeTDC(fstream &file)
 }
 
 void saveFile(TCanvas *c1, const string& cStrSave, const string& cHeader, double width, bool table ){ 
-  
 
   if(table) OutHtml<<"<TD  align='center'>"<< endl;
   if(table) OutHtml<<cHeader<<endl;
@@ -2222,13 +2164,7 @@ void saveFile(TCanvas *c1, const string& cStrSave, const string& cHeader, double
   OutHtml<< "</A>" << endl;
   
   if(table) OutHtml<<"</TD>"<< endl;
-
-  c1 = new TCanvas();
-
 }
-
-
-
 
 //double LookupDAQ(int DAC, bool range01) {
 double LookupDAQ(int DAC, int whichRange) {

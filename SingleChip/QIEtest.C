@@ -209,14 +209,16 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   //DCH: Start with reading in the file to produce the data arrays:
   file.open(myfile, ios::in);
   
-  if(!file) {
-    cout << "Cannot open file!"<<endl;
-    exit(1);
+  if(!file) 
+  {
+      cout << "Cannot open file!"<<endl;
+      exit(1);
   }
   
-  if(!storePed(file)) {
-    cout << "The data file was not successfully read" << endl;
-    exit(1);
+  if(!storePed(file)) 
+  {
+      cout << "The data file was not successfully read" << endl;
+      exit(1);
   }
   
   file.close();
@@ -249,94 +251,110 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   OutHtml << "<TR align='center'>" << endl;
   OutHtml << "<TD align='center'>Counts</TD>" << endl;
   
-  for( int i=0; i<4; i++) {
+  for( int i=0; i<4; ++i) 
+  {  
+      sprintf(cTemp,"PedCID%d",i);
+      Pedestal[i] = new TH1F(cTemp,"",15, 0,15);
     
-    sprintf(cTemp,"PedCID%d",i);
-    Pedestal[i] = new TH1F(cTemp,"",15, 0,15);
-    
-    for (int j=0; j< PedCIDCount[i]; j++){ 
-      if(PedRange[i][j] != 0) {
-	cout << "Range 1 Ped ERROR" << endl;
-	Pedestal[i]->Fill(-99);
+      for (int j=0; j<PedCIDCount[i]; ++j)
+      { 
+	  // Normal pedestal should be in range 0
+	  if(PedRange[i][j] != 0) 
+	  {
+	      cout << "Range 1 Ped ERROR" << endl;
+	      Pedestal[i]->Fill(-99);
+	  }
+	  else 
+	  {
+	      Pedestal[i]->Fill(PedMant[i][j]);
+	      PedCIDMean[i] += PedMant[i][j];  
+	  }
       }
-      else {
-	Pedestal[i]->Fill(PedMant[i][j]);
-	PedCIDMean[i] += PedMant[i][j];  
+    
+      // Get the Pedestal mean
+      PedCIDMean[i] /= PedCIDCount[i]; 
+    
+      for (int k=0; k<PedCIDCount[i]; ++k) 
+      {
+	  if(PedRange[i][k] == 0) 
+	  {
+	      PedCIDRMS[i] += pow( (PedMant[i][k] - PedCIDMean[i]) , 2);
+	  }
+	  else 
+	  {
+	      cout << "Range 1 Ped ERROR" << endl;
+	  }
       }
-    }
     
-    PedCIDMean[i] /= PedCIDCount[i]; 
-    
-    for (int k=0; k< PedCIDCount[i]; k++) {
-      if(PedRange[i][k] == 0) {
-	PedCIDRMS[i] += pow((PedMant[i][k] - PedCIDMean[i]),2);
-      }
-      else cout << "Range 1 Ped ERROR" << endl;
-    }
-    
-    PedCIDRMS[i] /= PedCIDCount[i];
-    PedCIDRMS[i] = sqrt(PedCIDRMS[i]);
-    
-    OutHtml << "<TD align='center'>"<< PedCIDCount[i]  << "</TD>" << endl;
+      PedCIDRMS[i] /= PedCIDCount[i];
+      PedCIDRMS[i] = sqrt(PedCIDRMS[i]);
+      
+      OutHtml << "<TD align='center'>"<< PedCIDCount[i]  << "</TD>" << endl;
     
   }
   OutHtml << "</TR>" << endl;
   OutHtml << "<TR align='center'>" << endl;
   OutHtml << "<TD align='center'>Pedestal</TD>" << endl;
   
-  for(int i=0; i<4; i++){
-    OutHtml << "<TD align=center>" << fixed<< setprecision(3) << PedCIDMean[i] << " +/- " << PedCIDRMS[i] << "</TD>"<< endl;
+  for(int i=0; i<4; i++)
+  {
+      OutHtml << "<TD align=center>" << fixed<< setprecision(3) << PedCIDMean[i] << " +/- " << PedCIDRMS[i] << "</TD>"<< endl;
   }
   
   OutHtml << "</table> " << endl;
   
   OutHtml << "<h3> Global Pedestal DAC Study </h3>" << endl;
   
-  for(int ped = 1; ped<64; ped++) {
-    if(ped > 31) PedDac[ped-1] = ped-32;
-    else {
-      PedDac[ped-1] = -1 * (ped & 31);
-    }
-    
-    //DCH, just added this
-    PedAvg[ped-1] = 0;
+  for(int ped=1; ped<64; ++ped) 
+  {
+      // Do first 32 differently from second 32 settings
+      if(ped > 31) 
+	  PedDac[ped-1] = ped-32;
+      else 
+	  PedDac[ped-1] = -1 * (ped & 31);
 
-    for(int read=0; read<129; read++) {
-      PedAvg[ped-1] += PEDtestRange[ped][read]*64 + PEDtestMant[ped][read];
-    }
-    PedAvg[ped-1] /= 129;
+      // I guess we have 129 readings at each PedDAC setting?
+      PedAvg[ped-1] = 0;
+      for(int read=0; read<129; ++read) 
+      {
+	  PedAvg[ped-1] += PEDtestRange[ped][read]*64 + PEDtestMant[ped][read];
+      }
+      PedAvg[ped-1] /= 129;
     
-    PedStd[ped-1] = 0;
-    for(int read=0; read<129; read++) {
-      PedStd[ped-1] += pow((PEDtestRange[ped][read]*64 + PEDtestMant[ped][read]) - PedAvg[ped-1],2);
-    }
-    PedStd[ped-1] /= 129;
-    PedStd[ped-1] = sqrt(PedStd[ped-1]);
+      PedStd[ped-1] = 0;
+      for(int read=0; read<129; ++read) 
+      {
+	  PedStd[ped-1] += pow((PEDtestRange[ped][read]*64 + PEDtestMant[ped][read]) - PedAvg[ped-1],2);
+      }
+      PedStd[ped-1] /= 129;
+      PedStd[ped-1] = sqrt(PedStd[ped-1]);
 
-    if(PedStd[ped-1] == 0) PedStd[ped-1] = 1/sqrt(12);
+      if(PedStd[ped-1] == 0) PedStd[ped-1] = 1/sqrt(12);
   }
   
-  for(int ped = 0; ped < 15; ped++) {
-    if((ped+1) > 7) CAPPedDac[ped] = (ped+1) - 8;
-    else CAPPedDac[ped] = -1 * ((ped+1) & 7);
+  for(int ped = 0; ped<15; ++ped) 
+  {
+      if((ped+1) > 7) CAPPedDac[ped] = (ped+1) - 8;
+      else CAPPedDac[ped] = -1 * ((ped+1) & 7);
     
-    for(int i= 0; i <4; i++) {
+      for(int i= 0; i<4; ++i) 
+      {
+	  for(int read=0; read<CAPPEDtestCount[ped][i]; ++read) 
+	  {
+	      CAPPedAvg[i][ped] += CAPPEDtestRange[ped][i][read]*64 + CAPPEDtestMant[ped][i][read];
+	  }
+	  CAPPedAvg[i][ped] /= CAPPEDtestCount[ped][i];
       
-      for(int read=0; read<CAPPEDtestCount[ped][i]; read++) {
-	CAPPedAvg[i][ped] += CAPPEDtestRange[ped][i][read]*64 + CAPPEDtestMant[ped][i][read];
+	  CAPPedStd[i][ped] = 0;
+	  for(int read=0; read<CAPPEDtestCount[ped][i]; ++read) 
+	  {
+	      CAPPedStd[i][ped] += pow((CAPPEDtestRange[ped][i][read]*64 + CAPPEDtestMant[ped][i][read]) - CAPPedAvg[i][ped],2);
+	  }
+	  CAPPedStd[i][ped] /= CAPPEDtestCount[ped][i];
+	  CAPPedStd[i][ped] = sqrt(CAPPedStd[i][ped]);
+      
+	  if(CAPPedStd[i][ped] == 0) CAPPedStd[i][ped] = 1/sqrt(12);
       }
-      CAPPedAvg[i][ped] /= CAPPEDtestCount[ped][i];
-      
-      CAPPedStd[i][ped] = 0;
-      for(int read=0; read<CAPPEDtestCount[ped][i]; read++) {
-	CAPPedStd[i][ped] += pow((CAPPEDtestRange[ped][i][read]*64 + CAPPEDtestMant[ped][i][read]) - CAPPedAvg[i][ped],2);
-      }
-      CAPPedStd[i][ped] /= CAPPEDtestCount[ped][i];
-      CAPPedStd[i][ped] = sqrt(CAPPedStd[i][ped]);
-      
-      if(CAPPedStd[i][ped] == 0) CAPPedStd[i][ped] = 1/sqrt(12);
-
-    }
   }
   
   PedGraph = new TGraphErrors(63, PedDac, PedAvg, NULL, PedStd);
@@ -353,7 +371,6 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   CAPPedGraph_3->SetMarkerStyle(21); 
 
   PedGraph->SetMarkerColor(kBlue);
-
   CAPPedGraph_0->SetMarkerColor(kBlue); 
   CAPPedGraph_1->SetMarkerColor(kBlue); 
   CAPPedGraph_2->SetMarkerColor(kBlue); 
@@ -381,7 +398,7 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   OutHtml << "" << endl;
   OutHtml << "<TR align='center'> <TD align='center' colspan=2><b> Global Pedestals DAC </b></TD></TR>"<< endl;
   OutHtml << "<TR align='center'><TD></TD>" << endl;
-  saveFile(c1," PedestalDac", "", 400);    
+  saveFile(c1,"PedestalDac", "", 400);    
   OutHtml << "</TR>" << endl;
   OutHtml << "<TR align='center'><TD> Slope Lo</TD><TD>" << PedFitLo->GetParameter(1) << " +/- " << PedFitLo->GetParError(1) << "</TD></TR>" << endl;
   OutHtml << "<TR align='center'><TD> ~fC/bin (target: ~3)</TD><TD>" << 2/PedFitLo->GetParameter(1) << "</TD></TR>" << endl;
@@ -469,10 +486,12 @@ void doPedTest(char* myfile, const string& cPathOut = "output/newPed") {
   pedLeg->AddEntry(CAPPedGraph_pre3, "CapID 3", "P");
   pedLeg->SetFillColor(0);
   
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<14; j++) {
-      CAPPedAvg_post[i][j] = CAPPedAvg[i][j] + (PedCIDMean[0] - PedCIDMean[i]) ;
-    }
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<14; ++j) 
+      {
+	  CAPPedAvg_post[i][j] = CAPPedAvg[i][j] + (PedCIDMean[0] - PedCIDMean[i]) ;
+      }
   }
   
   TGraphErrors *CAPPedGraph_post0 = new TGraphErrors(14, CAPPedDac, CAPPedAvg_post[0], NULL, CAPPedStd[0]);
@@ -544,14 +563,16 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   //DCH: Start with reading in the file to produce the data arrays:
   file.open(myfile, ios::in);
   
-  if(!file) {
-    cout << "Cannot open file!"<<endl;
-    exit(1);
+  if(!file) 
+  {
+      cout << "Cannot open file!"<<endl;
+      exit(1);
   }
   
-  if(!storeADC(file)) {
-    cout << "The data file was not successfully read" << endl;
-    exit(1);
+  if(!storeADC(file)) 
+  {
+      cout << "The data file was not successfully read" << endl;
+      exit(1);
   }
   
   file.close();
@@ -569,39 +590,45 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   //}
 
   //Now, we use the lookup table to convert DAQ setting to charge
-  for (int i=0; i<4; ++i){ // capid
-    for (int j=0; j<4; ++j) { // range 
-      for (int k=0; k<64; ++k) { // bin
-	
-	Up_work[i][j][k] = LookupDAQ(UpDAQ[i][j][k],j);
-	Down_work[i][j][k] = LookupDAQ(DownDAQ[i][j][k],j);
-
+  for (int i=0; i<4; ++i) // capid
+  { 
+      for (int j=0; j<4; ++j) // range
+      {  
+	  for (int k=0; k<64; ++k) // bin
+	  { 
+	      Up_work[i][j][k] = LookupDAQ(UpDAQ[i][j][k],j);
+	      Down_work[i][j][k] = LookupDAQ(DownDAQ[i][j][k],j);  
+	  }
       }
-    }
   }
   
   // DCH: loop here to fill analysis vectors
   // DCH: We use the "work" vectors because the last bin of 
   //      ramping down and the first bin of ramping up is garbage.
   //      Up and Down will be 63 element vectors and Mid/Width's will be 62.
-  for(int k=0; k<4; ++k) {
-    for(int j=0; j<4; ++j) {
-      for(int i = 0; i < 63; ++i) {
-	if(k==0) {
-	  if(i<62) index_[j][i] = i+(64*j)+1;
-	  index_Up[j][i] = i+(64*j)+1;
-	  index_Dn[j][i] = i+(64*j);
-	}
+  for(int k=0; k<4; ++k) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  for(int i = 0; i < 63; ++i) 
+	  {
+	      if(k==0) 
+	      {
+		  if(i<62) index_[j][i] = i+(64*j)+1;
+		  index_Up[j][i] = i+(64*j)+1;
+		  index_Dn[j][i] = i+(64*j);
+	      }
 
-	Up[k][j][i] = Up_work[k][j][i+1];
-	Down[k][j][i] = Down_work[k][j][i];
+	      Up[k][j][i] = Up_work[k][j][i+1];
+	      Down[k][j][i] = Down_work[k][j][i];
 
-	if(i<62) {
-	  Mid[k][j][i] = (Up_work[k][j][i+1] + Down_work[k][j][i+1])/2;
-	  Width[k][j][i] = Down_work[k][j][i+1] - Up_work[k][j][i+1];
-	}
+	      if(i<62) 
+	      {
+		  Mid[k][j][i] = (Up_work[k][j][i+1] + Down_work[k][j][i+1])/2;
+		  Width[k][j][i] = Down_work[k][j][i+1] - Up_work[k][j][i+1];
+	      }
+	  }
       }
-    }
   }
 
   //DCH setup the ouput file
@@ -626,61 +653,68 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   c1 = new TCanvas("c1","",900,900);
   c1->SetLeftMargin(0.15);
 
-  for(int  i=0; i<4; ++i) {
-    for(int j=0; j<4; ++j) {
-      RangePlot[i][j] = new TGraph(62, index_[0], Mid[i][j]);
-      RangePlot_Up[i][j] = new TGraph(63, index_Up[0], Up[i][j]);
-      RangePlot_Dn[i][j] = new TGraph(63, index_Dn[0], Down[i][j]);
-
-      RangePlot_stagger[i][j] = new TGraph(62, index_[j], Mid[i][j]);
-      RangePlot_Up_stagger[i][j] = new TGraph(63, index_Up[j], Up[i][j]);
-      RangePlot_Dn_stagger[i][j] = new TGraph(63,index_Dn[j], Down[i][j]);
-
-      RangePlot[i][j]->SetMarkerStyle(33);
-      RangePlot_Up[i][j]->SetMarkerStyle(23);
-      RangePlot_Dn[i][j]->SetMarkerStyle(22);
-
-      sprintf(cTemp,"CapID%d_Range%d; Mantissa; Charge (fC)",i,j);
-
-      cout << "i: " << i << ", j: " << j << ", cTemp: " << cTemp << endl;
-      RangePlot[i][j]->SetTitle(cTemp);
-      
-      RangePlot_stagger[i][j]->SetMarkerStyle(33);
-      RangePlot_Up_stagger[i][j]->SetMarkerStyle(23);
-      RangePlot_Dn_stagger[i][j]->SetMarkerStyle(22);
-
-      RangePlot_Up[i][j]->SetMarkerColor(kBlue);
-      RangePlot_Dn[i][j]->SetMarkerColor(kRed);
-
-      RangePlot_Up_stagger[i][j]->SetMarkerColor(kBlue);
-      RangePlot_Dn_stagger[i][j]->SetMarkerColor(kRed);
-    }
+  for(int  i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  RangePlot[i][j] = new TGraph(62, index_[0], Mid[i][j]);
+	  RangePlot_Up[i][j] = new TGraph(63, index_Up[0], Up[i][j]);
+	  RangePlot_Dn[i][j] = new TGraph(63, index_Dn[0], Down[i][j]);
+	  
+	  RangePlot_stagger[i][j] = new TGraph(62, index_[j], Mid[i][j]);
+	  RangePlot_Up_stagger[i][j] = new TGraph(63, index_Up[j], Up[i][j]);
+	  RangePlot_Dn_stagger[i][j] = new TGraph(63,index_Dn[j], Down[i][j]);
+	  
+	  RangePlot[i][j]->SetMarkerStyle(33);
+	  RangePlot_Up[i][j]->SetMarkerStyle(23);
+	  RangePlot_Dn[i][j]->SetMarkerStyle(22);
+	  
+	  sprintf(cTemp,"CapID%d_Range%d; Mantissa; Charge (fC)",i,j);
+	  
+	  cout << "i: " << i << ", j: " << j << ", cTemp: " << cTemp << endl;
+	  RangePlot[i][j]->SetTitle(cTemp);
+	  
+	  RangePlot_stagger[i][j]->SetMarkerStyle(33);
+	  RangePlot_Up_stagger[i][j]->SetMarkerStyle(23);
+	  RangePlot_Dn_stagger[i][j]->SetMarkerStyle(22);
+	  
+	  RangePlot_Up[i][j]->SetMarkerColor(kBlue);
+	  RangePlot_Dn[i][j]->SetMarkerColor(kRed);
+	  
+	  RangePlot_Up_stagger[i][j]->SetMarkerColor(kBlue);
+	  RangePlot_Dn_stagger[i][j]->SetMarkerColor(kRed);
+      }
   }
 
-  for(int i=0; i<4; ++i) {
-    allRanges[i] = new TMultiGraph();
-    allRanges_Up[i] = new TMultiGraph();
-    allRanges_Dn[i] = new TMultiGraph(); 
+  for(int i=0; i<4; ++i) 
+  {
+      allRanges[i] = new TMultiGraph();
+      allRanges_Up[i] = new TMultiGraph();
+      allRanges_Dn[i] = new TMultiGraph(); 
   }
 
-  for(int j=0; j<4; ++j){
-    for(int i=0; i<4; ++i) {
-      allRanges[j]->Add(RangePlot_stagger[j][i]);
-      allRanges_Up[j]->Add(RangePlot_Up_stagger[j][i]);
-      allRanges_Dn[j]->Add(RangePlot_Dn_stagger[j][i]);
+  for(int j=0; j<4; ++j)
+  {
+      for(int i=0; i<4; ++i) 
+      {
+	  allRanges[j]->Add(RangePlot_stagger[j][i]);
+	  allRanges_Up[j]->Add(RangePlot_Up_stagger[j][i]);
+	  allRanges_Dn[j]->Add(RangePlot_Dn_stagger[j][i]);
 
-      if(j==0) {
-	sprintf(cTemp,"CapID%d; ; Charge (fC)",i);
-	allRanges[i]->SetTitle(cTemp);
-      } 
-   }
+	  if(j==0) 
+	  {
+	      sprintf(cTemp,"CapID%d; ; Charge (fC)",i);
+	      allRanges[i]->SetTitle(cTemp);
+	  } 
+      }
   }
 
-  for(int i=0; i<4; ++i) {
-    sprintf(cTemp, "CapID%d_FullRange", i);
-    Ranges[i] = new TCanvas(cTemp, cTemp, 900,900);
-    sprintf(cTemp, "CapID%d_Ranges", i);
-    SubRanges[i] = new TCanvas(cTemp, cTemp, 900, 900);
+  for(int i=0; i<4; ++i) 
+  {
+      sprintf(cTemp, "CapID%d_FullRange", i);
+      Ranges[i] = new TCanvas(cTemp, cTemp, 900,900);
+      sprintf(cTemp, "CapID%d_Ranges", i);
+      SubRanges[i] = new TCanvas(cTemp, cTemp, 900, 900);
   }
 
   OutHtml << "<table cellspacing=\"\" cellpadding=\"\" border=\"\" align=\"center\" >" << endl;
@@ -691,79 +725,83 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   OutHtml << "<TD align='center'> Full Range </TD>" << endl;
   
 
-  for(int i=0; i<4; ++i) {
-    Ranges[i]->cd();
-    Ranges[i]->SetLeftMargin(0.15);
-    allRanges[i]->Draw("AP");
-    //cout << allRanges[i]->GetXaxis()->GetNbins() << endl;
-    //cout << allRanges[i]->GetXaxis()->GetBinWidth(1) << endl;
-    //cout << allRanges[i]->GetXaxis()->GetBinLowEdge(1) << endl;
-    //cout << allRanges[i]->GetXaxis()->GetBinUpEdge(100) << endl;
-    //allRanges[i]->GetYaxis()->SetOffset(0.1) << endl;
-    //allRanges[i]->Draw("AP");
-
-    allRanges[i]->GetYaxis()->SetTitleOffset(1.7);
-    allRanges[i]->Draw("AP");
-
-    //allRanges[i]->GetXaxis()->SetBinLabel(5,"R0 M0");
-    //allRanges[i]->GetXaxis()->SetBinLabel(10,"R0 M16");
-    //allRanges[i]->GetXaxis()->SetBinLabel(16,"R0 M32");
-    //allRanges[i]->GetXaxis()->SetBinLabel(22,"R0 M48");
-    //allRanges[i]->GetXaxis()->SetBinLabel(28,"R1 M0");
-    //allRanges[i]->GetXaxis()->SetBinLabel(34,"R1 M16");
-    //allRanges[i]->GetXaxis()->SetBinLabel(39,"R1 M32");
-    //allRanges[i]->GetXaxis()->SetBinLabel(45,"R1 M48");
-    //allRanges[i]->GetXaxis()->SetBinLabel(51,"R2 M0");
-    //allRanges[i]->GetXaxis()->SetBinLabel(57,"R2 M16");
-    //allRanges[i]->GetXaxis()->SetBinLabel(62,"R2 M32");
-    //allRanges[i]->GetXaxis()->SetBinLabel(68,"R2 M48");
-    //allRanges[i]->GetXaxis()->SetBinLabel(74,"R3 M0");
-    //allRanges[i]->GetXaxis()->SetBinLabel(79,"R3 M16");
-    //allRanges[i]->GetXaxis()->SetBinLabel(85,"R3 M32");
-    //allRanges[i]->GetXaxis()->SetBinLabel(91,"R3 M48");
-    //allRanges[i]->GetXaxis()->SetBinLabel(97,"R3 M63");
-    //
-    //allRanges[i]->GetXaxis()->SetNdivisions(405);
-
-    //gPad->Modified();
-    
-    allRanges_Up[i]->Draw("P");
-    allRanges_Dn[i]->Draw("P");
-    allRanges[i]->Draw("P");
-
-    sprintf(cTemp2,"FullRange_CapID%d",i);
-    sprintf(cTemp3,"CapID %d",i);
-    saveFile(Ranges[i],cTemp2,cTemp3);    
-
-    SubRanges[i]->Divide(2,2);
-    for(int j=0; j<4; ++j){
-      SubRanges[i]->cd(j+1);
-      RangePlot[i][j]->Draw("AP");
-      RangePlot_Up[i][j]->Draw("P");
-      RangePlot_Dn[i][j]->Draw("P");
-      RangePlot[i][j]->Draw("P");
-    }
+  for(int i=0; i<4; ++i) 
+  {
+      Ranges[i]->cd();
+      Ranges[i]->SetLeftMargin(0.15);
+      allRanges[i]->Draw("AP");
+      //cout << allRanges[i]->GetXaxis()->GetNbins() << endl;
+      //cout << allRanges[i]->GetXaxis()->GetBinWidth(1) << endl;
+      //cout << allRanges[i]->GetXaxis()->GetBinLowEdge(1) << endl;
+      //cout << allRanges[i]->GetXaxis()->GetBinUpEdge(100) << endl;
+      //allRanges[i]->GetYaxis()->SetOffset(0.1) << endl;
+      //allRanges[i]->Draw("AP");
+      
+      allRanges[i]->GetYaxis()->SetTitleOffset(1.7);
+      allRanges[i]->Draw("AP");
+      
+      //allRanges[i]->GetXaxis()->SetBinLabel(5,"R0 M0");
+      //allRanges[i]->GetXaxis()->SetBinLabel(10,"R0 M16");
+      //allRanges[i]->GetXaxis()->SetBinLabel(16,"R0 M32");
+      //allRanges[i]->GetXaxis()->SetBinLabel(22,"R0 M48");
+      //allRanges[i]->GetXaxis()->SetBinLabel(28,"R1 M0");
+      //allRanges[i]->GetXaxis()->SetBinLabel(34,"R1 M16");
+      //allRanges[i]->GetXaxis()->SetBinLabel(39,"R1 M32");
+      //allRanges[i]->GetXaxis()->SetBinLabel(45,"R1 M48");
+      //allRanges[i]->GetXaxis()->SetBinLabel(51,"R2 M0");
+      //allRanges[i]->GetXaxis()->SetBinLabel(57,"R2 M16");
+      //allRanges[i]->GetXaxis()->SetBinLabel(62,"R2 M32");
+      //allRanges[i]->GetXaxis()->SetBinLabel(68,"R2 M48");
+      //allRanges[i]->GetXaxis()->SetBinLabel(74,"R3 M0");
+      //allRanges[i]->GetXaxis()->SetBinLabel(79,"R3 M16");
+      //allRanges[i]->GetXaxis()->SetBinLabel(85,"R3 M32");
+      //allRanges[i]->GetXaxis()->SetBinLabel(91,"R3 M48");
+      //allRanges[i]->GetXaxis()->SetBinLabel(97,"R3 M63");
+      //
+      //allRanges[i]->GetXaxis()->SetNdivisions(405);
+      
+      //gPad->Modified();
+      
+      allRanges_Up[i]->Draw("P");
+      allRanges_Dn[i]->Draw("P");
+      allRanges[i]->Draw("P");
+      
+      sprintf(cTemp2,"FullRange_CapID%d",i);
+      sprintf(cTemp3,"CapID %d",i);
+      saveFile(Ranges[i],cTemp2,cTemp3);    
+      
+      SubRanges[i]->Divide(2,2);
+      for(int j=0; j<4; ++j)
+      {
+	  SubRanges[i]->cd(j+1);
+	  RangePlot[i][j]->Draw("AP");
+	  RangePlot_Up[i][j]->Draw("P");
+	  RangePlot_Dn[i][j]->Draw("P");
+	  RangePlot[i][j]->Draw("P");
+      }
   }
   OutHtml << "</TR>" << endl;
   OutHtml << "<TR align='center'> <TD align='center' colspan=5><b> Individual Range View </b></TD></TR>"<< endl;
 
   c1->cd();
-  for (int j=0; j<4; ++j) {
-    OutHtml << "<TR align='center'> <TD align='center'> Range " << j << "</TD>" << endl;
-    for(int i=0; i<4; ++i) {
-      RangePlot[i][j]->GetHistogram()->SetTitleOffset(1.8,"Y");
-
-      RangePlot[i][j]->Draw("AP");
-      RangePlot_Up[i][j]->Draw("P");
-      RangePlot_Dn[i][j]->Draw("P");
-      RangePlot[i][j]->Draw("P");
-      
-      sprintf(cTemp2,"Range%d_CapID%d",j,i);
-      sprintf(cTemp3,"CapID %d",i);
-      saveFile(c1,cTemp2,cTemp3);
-
-    }
-    OutHtml << "</TR>" << endl;
+  for (int j=0; j<4; ++j) 
+  {
+      OutHtml << "<TR align='center'> <TD align='center'> Range " << j << "</TD>" << endl;
+      for(int i=0; i<4; ++i) 
+      {
+	  RangePlot[i][j]->GetHistogram()->SetTitleOffset(1.8,"Y");
+	  
+	  RangePlot[i][j]->Draw("AP");
+	  RangePlot_Up[i][j]->Draw("P");
+	  RangePlot_Dn[i][j]->Draw("P");
+	  RangePlot[i][j]->Draw("P");
+	  
+	  sprintf(cTemp2,"Range%d_CapID%d",j,i);
+	  sprintf(cTemp3,"CapID %d",i);
+	  saveFile(c1,cTemp2,cTemp3);
+	  
+      }
+      OutHtml << "</TR>" << endl;
   }
   OutHtml << "<TR align='center'> <TD align='center' colspan=5><b> Individual Range w/ Fits </b></TD></TR>"<< endl;
   
@@ -776,36 +814,39 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   double maxFit[4] = {15,35,56,62};
   //double maxFit[4] = {15,35,56,61};
 
-  for(int i =0; i<4; i++) {
-    for(int j =0; j<4; j++) {
-      for(int k =0; k<4; k++) {
-
-	sprintf(cTemp,"Fit_CID%d_r%d_s%d",i,j,k);
-	SubRangeFit[i][j][k] = new TF1(cTemp,"pol1", minFit[k], maxFit[k]);
-
-	RangePlot[i][j]->Fit(SubRangeFit[i][j][k], "RQ+");
+  for(int i =0; i<4; i++) 
+  {
+      for(int j =0; j<4; j++) 
+      {
+	  for(int k =0; k<4; k++) 
+	  {
+	      sprintf(cTemp,"Fit_CID%d_r%d_s%d",i,j,k);
+	      SubRangeFit[i][j][k] = new TF1(cTemp,"pol1", minFit[k], maxFit[k]);
+	      
+	      RangePlot[i][j]->Fit(SubRangeFit[i][j][k], "RQ+");
+	  }
       }
-    }
   }
-
+  
   c1->cd();
-  for (int j=0; j<4; j++) {
-    OutHtml << "<TR align='center'> <TD align='center'> Range " << j << "</TD>" << endl;
-    for(int i=0; i<4; i++) {
-      RangePlot[i][j]->Draw("AP");
-      RangePlot_Up[i][j]->Draw("P");
-      RangePlot_Dn[i][j]->Draw("P");
-      RangePlot[i][j]->Draw("P");
-      
-      sprintf(cTemp2,"Range%d_CapID%d_wFit",j,i);
-      sprintf(cTemp3,"CapID %d",i);
-      saveFile(c1,cTemp2,cTemp3);
-
-    }
-    OutHtml << "</TR>" << endl;
+  for (int j=0; j<4; j++) 
+  {
+      OutHtml << "<TR align='center'> <TD align='center'> Range " << j << "</TD>" << endl;
+      for(int i=0; i<4; i++) 
+      {
+	  RangePlot[i][j]->Draw("AP");
+	  RangePlot_Up[i][j]->Draw("P");
+	  RangePlot_Dn[i][j]->Draw("P");
+	  RangePlot[i][j]->Draw("P");
+	  
+	  sprintf(cTemp2,"Range%d_CapID%d_wFit",j,i);
+	  sprintf(cTemp3,"CapID %d",i);
+	  saveFile(c1,cTemp2,cTemp3);  
+      }
+      OutHtml << "</TR>" << endl;
   }
   OutHtml << "</table>" << endl;
-
+  
   //DCH: Ok, now output the slope and intercept results:
 
   //DCH here is the code to save file
@@ -824,28 +865,34 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   OutHtml << "<TR>" << endl;
   
   OutHtml << "<TD>CapId</TD>";
-  for(int i=0; i<3;i++) {
-    OutHtml << "<TD align='center'>0</TD><TD align='center'>1</TD><TD align='center'>2</TD><TD align='center'>3</TD>";
+  for(int i=0; i<3;i++) 
+  {
+      OutHtml << "<TD align='center'>0</TD><TD align='center'>1</TD><TD align='center'>2</TD><TD align='center'>3</TD>";
   }
   OutHtml << "</TR>" << endl;
   
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      OutHtml << "<TR align='center'><TD align='center'> R " << i << ", Sub " << j << "</TD>";
-      for(int k=0;k<4;k++) {
-	OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetChisquare() << "/" << setprecision(0) << SubRangeFit[k][i][j]->GetNDF() << "</TD>";
+  for(int i=0; i<4; i++) 
+  {
+      for(int j=0; j<4; j++) 
+      {
+	  OutHtml << "<TR align='center'><TD align='center'> R " << i << ", Sub " << j << "</TD>";
+	  for(int k=0;k<4;k++) 
+	  {
+	      OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetChisquare() << "/" << setprecision(0) << SubRangeFit[k][i][j]->GetNDF() << "</TD>";
+	  }
+	  for(int k=0;k<4;k++) 
+	  {
+	      OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetParameter(1) << " +/- " << SubRangeFit[k][i][j]->GetParError(1) << "</TD>";
+	  }
+	  for(int k=0;k<4;k++) 
+	  {
+	      OutHtml << "<TD>" << fixed << setprecision(1) << SubRangeFit[k][i][j]->GetParameter(0) << " +/- " << SubRangeFit[k][i][j]->GetParError(0) << "</TD>";
+	  }
+	  OutHtml << "</TR>" << endl;
       }
-      for(int k=0;k<4;k++) {
-	OutHtml << "<TD>" << fixed << setprecision(2) << SubRangeFit[k][i][j]->GetParameter(1) << " +/- " << SubRangeFit[k][i][j]->GetParError(1) << "</TD>";
-      }
-      for(int k=0;k<4;k++) {
-	OutHtml << "<TD>" << fixed << setprecision(1) << SubRangeFit[k][i][j]->GetParameter(0) << " +/- " << SubRangeFit[k][i][j]->GetParError(0) << "</TD>";
-      }
-      OutHtml << "</TR>" << endl;
-    }
   }
   OutHtml << "</table> " << endl;
-
+  
   /*
   cout << "********************************************************************" << endl;
   cout << "********************************************************************" << endl;
@@ -928,115 +975,91 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
 			 {2400, 4800, 9000, 18000}};
   
  
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<4; k++) {
-
-	sprintf(cTemp,"BinWidth_CapID%d_R%d_SR%d",i,j,k);
-	BinWidths[i][j][k] = new TH1F(cTemp,"", numbins[j][k], minbin[j][k], maxbin[j][k]);
-
-	sprintf(cTemp,"Bin Width, R%d_Sr%d; charge (fC); count",j,k);
-	BinWidths[i][j][k]->SetTitle(cTemp);
-	//BinWidths[i][j][k]->SetLabelOffset(0.1,"Y");
-
+  for(int i=0; i<4; i++) 
+  {
+      for(int j=0; j<4; j++) 
+      {
+	  for(int k=0; k<4; k++) 
+	  {    
+	      sprintf(cTemp,"BinWidth_CapID%d_R%d_SR%d",i,j,k);
+	      BinWidths[i][j][k] = new TH1F(cTemp,"", numbins[j][k], minbin[j][k], maxbin[j][k]);
+	      
+	      sprintf(cTemp,"Bin Width, R%d_Sr%d; charge (fC); count",j,k);
+	      BinWidths[i][j][k]->SetTitle(cTemp);
+	      //BinWidths[i][j][k]->SetLabelOffset(0.1,"Y");
+	  }
       }
-    }
   }
   
  
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<62; k++) {
-	if(k < 15) BinWidths[i][j][0]->Fill(Width[i][j][k]);
-	else if(k < 35) BinWidths[i][j][1]->Fill(Width[i][j][k]);
-	else if(k < 56) BinWidths[i][j][2]->Fill(Width[i][j][k]);
-	//else if(k < 64) BinWidths[i][j][3]->Fill(Width[i][j][k]);
-	else BinWidths[i][j][3]->Fill(Width[i][j][k]);
-
+  for(int i=0; i<4; i++) 
+  {
+      for(int j=0; j<4; j++) 
+      {
+	  for(int k=0; k<62; k++) 
+	  {
+	      if(k < 15) BinWidths[i][j][0]->Fill(Width[i][j][k]);
+	      else if(k < 35) BinWidths[i][j][1]->Fill(Width[i][j][k]);
+	      else if(k < 56) BinWidths[i][j][2]->Fill(Width[i][j][k]);
+	      //else if(k < 64) BinWidths[i][j][3]->Fill(Width[i][j][k]);
+	      else BinWidths[i][j][3]->Fill(Width[i][j][k]);      
+	  }
       }
-    }
   }
 
-
-
-  //TCanvas* Widths[4][4];
-  
-  //for(int i=0; i<4; i++){
-  //for(int j=0; j<4; j++) {
-  //sprintf(cTemp,"FullBinWidths_CapID%d_Range%d",i,j);
-  //Widths[i][j] = new TCanvas(cTemp, cTemp);
-  //}
-  //}
-
   gStyle->SetOptStat(1111111);
-
-  //for(int i=0; i<4; i++) {
-  //OutHtml << "<TR align='center'> <TD align='center' colspan=5><b> Range " << i << "</b></TD></TR>" << endl;
-  //  
-  //for(int j=0;j<4; j++) {
-  //OutHtml << "<TR align='center'> <TD align='center'> Range " << i << ", Sub " << j << "</TD>" << endl;
-  //  
-  //for(int k=0; k<4; k++) {
-  //c1->cd();
-  //BinWidths[k][i][j]->Draw();
-
-  //sprintf(cTemp2,"CapID%d_Range%d_Sub%d",k,i,j);
-  //sprintf(cTemp3,"CapID %d",k);
-  //saveFile(c1,cTemp2,cTemp3);
-  //
-  //}
-  //OutHtml << "</TR>" << endl;
-  //}
-  //}
-  //OutHtml << "</table>" << endl;
-  //OutHtml << "" << endl;
-  //OutHtml << "" << endl;
 
   //DCH do DNL plot for bin widths:
   
   double average[4][4][4];
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<4; k++) {
-	average[i][j][k] = 0;
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  for(int k=0; k<4; ++k) 
+	  {
+	      average[i][j][k] = 0;
+	  }
       }
-    }
   }
   
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<62; k++) {
-	if(k < 15) average[i][j][0] += Width[i][j][k];
-	else if(k < 35) average[i][j][1] += Width[i][j][k];
-	else if(k < 56) average[i][j][2] += Width[i][j][k];
-	else average[i][j][3] += Width[i][j][k];
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  for(int k=0; k<62; ++k) 
+	  {
+	      if(k < 15) average[i][j][0] += Width[i][j][k];
+	      else if(k < 35) average[i][j][1] += Width[i][j][k];
+	      else if(k < 56) average[i][j][2] += Width[i][j][k];
+	      else average[i][j][3] += Width[i][j][k];
+	  }
       }
-    }
   }  
 
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      average[i][j][0] /= 15;
-      average[i][j][1] /= 20;
-      average[i][j][2] /= 21;
-      average[i][j][3] /= 6;
-      
-    }
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  average[i][j][0] /= 15;
+	  average[i][j][1] /= 20;
+	  average[i][j][2] /= 21;
+	  average[i][j][3] /= 6;  
+      }
   }
   
 
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-
-      sprintf(cTemp,"BinWidthDNL_CapID%d_SR%d",i,j);
-      DNL_ADC[i][j] = new TH1F(cTemp,"", 25, -1, 1);
-      
-      sprintf(cTemp,"ADC DNL, Bin Width EndP, Sr%d; DNL; count",j);
-      DNL_ADC[i][j]->SetTitle(cTemp);
-      DNL_ADC[i][j]->SetTitleOffset(1.2,"Y");
-
-
-    }
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  sprintf(cTemp,"BinWidthDNL_CapID%d_SR%d",i,j);
+	  DNL_ADC[i][j] = new TH1F(cTemp,"", 25, -1, 1);
+	  
+	  sprintf(cTemp,"ADC DNL, Bin Width EndP, Sr%d; DNL; count",j);
+	  DNL_ADC[i][j]->SetTitle(cTemp);
+	  DNL_ADC[i][j]->SetTitleOffset(1.2,"Y");
+      }
   }
   
   DNL_allADC = new TH1F("BinWidthDNL_all","", 25, -1, 1);
@@ -1052,87 +1075,91 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
 
   double avg = 0;
 
-  for(int k=0; k<62; k++) {
-    if(k<15) pickRange = 0;
-    else if(k<35) pickRange = 1;
-    else if(k<56) pickRange = 2;
-    else pickRange = 3;
+  for(int k=0; k<62; ++k) 
+  {
+      if(k<15) pickRange = 0;
+      else if(k<35) pickRange = 1;
+      else if(k<56) pickRange = 2;
+      else pickRange = 3;
 
-    best = 1000.;
-    avg = 0;
+      best = 1000.;
+      avg = 0;
+      
+      for(int j=1; j<3; ++j) 
+      {
+	  for(int i=0; i<4; ++i) 
+	  {
+	      if(fabs(Width[i][j][k]/average[i][j][pickRange] - 1) < fabs(best)) 
+	      {
+		  best = Width[i][j][k]/average[i][j][pickRange] - 1;
+	      }
+	      //cout << "j=" << j << ", i=" << i << ", value= " << Width[i][j][k]/average[i][j][pickRange] - 1 << ", best = " << best << endl;
 
-    for(int j=1; j<3; j++) {
-      for(int i=0; i<4; i++) {
-	if(fabs(Width[i][j][k]/average[i][j][pickRange] - 1) < fabs(best)) {
-	  best = Width[i][j][k]/average[i][j][pickRange] - 1;
-	}
-	//cout << "j=" << j << ", i=" << i << ", value= " << Width[i][j][k]/average[i][j][pickRange] - 1 << ", best = " << best << endl;
-
-	  avg += Width[i][j][k]/average[i][j][pickRange] - 1;
-	  
+	      avg += Width[i][j][k]/average[i][j][pickRange] - 1;	      
+	  }
       }
-    }
 
-    avg /= 8;
-
-    DNL_ADCBest->Fill(best);
-    DNL_ADCAvg->Fill(avg);
+      avg /= 8;
+      
+      DNL_ADCBest->Fill(best);
+      DNL_ADCAvg->Fill(avg);
   }
 
-  for(int i=0; i<4; i++) {
-    for(int j=1; j<3; j++) {
-      for(int k=0; k<62; k++) {
-	if(k < 15) {
-	  DNL_ADC[i][0]->Fill(Width[i][j][k]/average[i][j][0] - 1);
-	  DNL_allADC->Fill(Width[i][j][k]/average[i][j][0] - 1);
-	  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][0] - 1);
-	}
-	else if(k < 35)  {
-	  DNL_ADC[i][1]->Fill(Width[i][j][k]/average[i][j][1] - 1);
-	  DNL_allADC->Fill(Width[i][j][k]/average[i][j][1] - 1);
-	  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][1] - 1);
-
-	}
-	else if(k < 56) {
-	  DNL_ADC[i][2]->Fill(Width[i][j][k]/average[i][j][2] - 1);
-	  DNL_allADC->Fill(Width[i][j][k]/average[i][j][2] - 1);
-	  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][2] - 1);
-
-	}
-	else {
-	  DNL_ADC[i][3]->Fill(Width[i][j][k]/average[i][j][3] - 1);
-	  DNL_allADC->Fill(Width[i][j][k]/average[i][j][3] - 1);
-	  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][3] - 1);
-
-	}
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=1; j<3; ++j) 
+      {
+	  for(int k=0; k<62; ++k) 
+	  {
+	      if(k < 15) 
+	      {
+		  DNL_ADC[i][0]->Fill(Width[i][j][k]/average[i][j][0] - 1);
+		  DNL_allADC->Fill(Width[i][j][k]/average[i][j][0] - 1);
+		  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][0] - 1);
+	      }
+	      else if(k < 35)  
+	      {
+		  DNL_ADC[i][1]->Fill(Width[i][j][k]/average[i][j][1] - 1);
+		  DNL_allADC->Fill(Width[i][j][k]/average[i][j][1] - 1);
+		  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][1] - 1);
+	      }
+	      else if(k < 56) 
+	      {
+		  DNL_ADC[i][2]->Fill(Width[i][j][k]/average[i][j][2] - 1);
+		  DNL_allADC->Fill(Width[i][j][k]/average[i][j][2] - 1);
+		  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][2] - 1);
+	      }
+	      else 
+	      {
+		  DNL_ADC[i][3]->Fill(Width[i][j][k]/average[i][j][3] - 1);
+		  DNL_allADC->Fill(Width[i][j][k]/average[i][j][3] - 1);
+		  if(j<3) DNL_ADCTest->Fill(Width[i][j][k]/average[i][j][3] - 1);
+	      }
+	  }
       }
-    }
   }  
   
-  
-
   OutHtml << "<table cellspacing=\"\" cellpading=\"\" border=\"\" align=\"center\" >" << endl;
   OutHtml << "" << endl;
   OutHtml << "<TR align='center'> <TD align='center' colspan=5><b> ADC Differential Non-Linearity </b></TD></TR>" << endl;
   
-  for(int j=0;j<4; j++) {
-    OutHtml << "<TR align='center'> <TD align='center'> Sub " << j <<"</TD>" << endl;
+  for(int j=0;j<4; ++j) 
+  {
+      OutHtml << "<TR align='center'> <TD align='center'> Sub " << j <<"</TD>" << endl;
     
-    for(int i=0; i<4; i++) {
-      c1->cd();
-      //DNL_ADC[i][j]->Draw();
-      //DNL_ADCTest->Draw();
-      if(i==0) DNL_ADCBest->Draw();
-      else if(i==1) DNL_ADCAvg->Draw();
-      else if(i==2) DNL_ADCTest->Draw();
-      else DNL_ADCBest->Draw();
-      
-      sprintf(cTemp2,"DNL_ADC_CapID%d_Sub%d",i,j);
-      sprintf(cTemp3,"CapID %d",i);
-      saveFile(c1,cTemp2,cTemp3);
-      
-    }
-    OutHtml << "</TR>" << endl;
+      for(int i=0; i<4; ++i) 
+      {
+	  c1->cd();
+	  if(i==0) DNL_ADCBest->Draw();
+	  else if(i==1) DNL_ADCAvg->Draw();
+	  else if(i==2) DNL_ADCTest->Draw();
+	  else DNL_ADCBest->Draw();
+	  
+	  sprintf(cTemp2,"DNL_ADC_CapID%d_Sub%d",i,j);
+	  sprintf(cTemp3,"CapID %d",i);
+	  saveFile(c1,cTemp2,cTemp3);	  
+      }
+      OutHtml << "</TR>" << endl;
   }
   OutHtml << "</table>" << endl;
 
@@ -1157,78 +1184,80 @@ void doADCTest(char* myfile, const string& cPathOut="output/newADC") {
   OutHtml << "<TR align='center'><TD align='center' colspan=5> Range Overlaps </TD></TR>" << endl;
   OutHtml << "<TR align='center'><TD align='center'></TD> <TD align='center'>CapID 0</TD><TD align='center'>CapID 1</TD><TD align='center'>CapID 2</TD><TD align='center'>CapID 3</TD></TR>" << endl;;
   
-  for(int j=0; j<3; j++) {
-    OutHtml << "<TR align='center'><TD align='center'> Range " << j << "-" << j+1 << " Overlap </TD>";
-    for(int i=0; i<4; i++) {
-      OutHtml << "<TD>" << fixed << setprecision(2) << (Down[i][j][62] - Up[i][j+1][0])/average[i][j][3] +2 << "</TD>";
-    }
-    OutHtml << "</TR>" << endl;
+  for(int j=0; j<3; ++j) 
+  {
+      OutHtml << "<TR align='center'><TD align='center'> Range " << j << "-" << j+1 << " Overlap </TD>";
+      for(int i=0; i<4; ++i) {
+	  OutHtml << "<TD>" << fixed << setprecision(2) << (Down[i][j][62] - Up[i][j+1][0])/average[i][j][3] +2 << "</TD>";
+      }
+      OutHtml << "</TR>" << endl;
   }
 
   //DCH: Ok, do this for midpoints too.
-
-
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<4; k++) {
-
-	sprintf(cTemp,"Bin Width Mid_CapID%d_R%d_SR%d",i,j,k);
-	BinWidths_Mid[i][j][k] = new TH1F(cTemp,"", numbins[j][k], minbin[j][k], maxbin[j][k]);
-
-	sprintf(cTemp,"Bin Width Mid, R%d_Sr%d; charge (fC); count",j,k);
-	BinWidths_Mid[i][j][k]->SetTitle(cTemp);
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  for(int k=0; k<4; ++k) 
+	  {
+	      sprintf(cTemp,"Bin Width Mid_CapID%d_R%d_SR%d",i,j,k);
+	      BinWidths_Mid[i][j][k] = new TH1F(cTemp,"", numbins[j][k], minbin[j][k], maxbin[j][k]);
+	      
+	      sprintf(cTemp,"Bin Width Mid, R%d_Sr%d; charge (fC); count",j,k);
+	      BinWidths_Mid[i][j][k]->SetTitle(cTemp);
+	  }
       }
-    }
   }
   
   double MidDiff[4][4][61];
-  for(int j=0;j<4;j++) {
-    for(int k=0;k<4;k++) {
-      for(int i = 0; i<61; i++) MidDiff[j][k][i] = Mid[j][k][i+1]-Mid[j][k][i];
-    }
-  }
-
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      for(int k=0; k<61; k++) {
-	if(k < 13) BinWidths_Mid[i][j][0]->Fill(MidDiff[i][j][k]);
-	else if(k < 33 && k > 15) BinWidths_Mid[i][j][1]->Fill(MidDiff[i][j][k]);
-	else if(k < 54 && k > 35) BinWidths_Mid[i][j][2]->Fill(MidDiff[i][j][k]);
-	//else if(k < 64) BinWidths[i][j][3]->Fill(Width[i][j][k]);
-	else if(k>56) BinWidths_Mid[i][j][3]->Fill(MidDiff[i][j][k]);
-
+  for(int j=0; j<4; ++j) 
+  {
+      for(int k=0; k<4; ++k) 
+      {
+	  for(int i = 0; i<61; i++) 
+	      MidDiff[j][k][i] = Mid[j][k][i+1]-Mid[j][k][i];
       }
-    }
   }
 
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  for(int k=0; k<61; ++k) 
+	  {
+	      if(k < 13) BinWidths_Mid[i][j][0]->Fill(MidDiff[i][j][k]);
+	      else if(k < 33 && k > 15) BinWidths_Mid[i][j][1]->Fill(MidDiff[i][j][k]);
+	      else if(k < 54 && k > 35) BinWidths_Mid[i][j][2]->Fill(MidDiff[i][j][k]);
+	      //else if(k < 64) BinWidths[i][j][3]->Fill(Width[i][j][k]);
+	      else if(k>56) BinWidths_Mid[i][j][3]->Fill(MidDiff[i][j][k]);	      
+	  }
+      }
+  }
   
-  for(int i=0; i<4; i++){
-    for(int j=0; j<4; j++) {
-      sprintf(cTemp,"MidBinWidths_CapID%d_Range%d",i,j);
-      WidthsMid[i][j] = new TCanvas(cTemp, cTemp, 900, 900);
-    }
-  }
-
-  for(int i=0; i<4; i++) {
-    for(int j=0; j<4; j++) {
-      WidthsMid[i][j]->Divide(2,2);
-      for(int k=0; k<4; k++) {
-	WidthsMid[i][j]->cd(k+1);
-	BinWidths_Mid[i][j][k]->Draw();
-	
+  for(int i=0; i<4; ++i)
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  sprintf(cTemp,"MidBinWidths_CapID%d_Range%d",i,j);
+	  WidthsMid[i][j] = new TCanvas(cTemp, cTemp, 900, 900);
       }
-    }
   }
 
-  //DCH Fit and print out the results:
-  //DCH TODO
+  for(int i=0; i<4; ++i) 
+  {
+      for(int j=0; j<4; ++j) 
+      {
+	  WidthsMid[i][j]->Divide(2,2);
+	  for(int k=0; k<4; ++k) 
+	  {
+	      WidthsMid[i][j]->cd(k+1);
+	      BinWidths_Mid[i][j][k]->Draw();      
+	  }
+      }
+  }
 
   OutHtml.close();
- 
-  //cleanUp();
-  
 }
-
 
 
 void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
@@ -1239,14 +1268,16 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   //DCH: Start with reading in the file to produce the data arrays:
   file.open(myfile, ios::in);
   
-  if(!file) {
-    cout << "Cannot open file!"<<endl;
-    exit(1);
+  if(!file) 
+  {
+      cout << "Cannot open file!"<<endl;
+      exit(1);
   }
   
-  if(!storeTDC(file)) {
-    cout << "The data file was not successfully read" << endl;
-    exit(1);
+  if(!storeTDC(file)) 
+  {
+      cout << "The data file was not successfully read" << endl;
+      exit(1);
   }
   file.close();
 
@@ -1260,36 +1291,22 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   bool foundInt = 0;
   double interval;
 
-  for(int delay=0; delay<255; delay++) {
-    time[delay] = delay/4.;
-    time2[delay] = delay/4.;
-
-
+  for(int delay=0; delay<255; ++delay) 
+  {
+      time[delay] = delay/4.;
+      time2[delay] = delay/4.;
     
-    //if(delay < 100) {
-    //  time[delay] = delay;
-    //}
-    //else if(delay < 200) {
-    //  time[delay] = delay-100;
-    //}
-    //else {
-    //  time[delay] = delay-200;
-    //}
-
-    for(int event = 0; event < 4; event++) {
-      for(int slot=0; slot < 22; slot++) {
-
-	TDCCapID[delay][event][slot]    = (TDCtestRead[delay][event][slot] & 0xC000) >> 14;
-	TDC[delay][event][slot]         = (TDCtestRead[delay][event][slot] & 0x3F00) >> 8;
-	TDCRange[delay][event][slot]    = (TDCtestRead[delay][event][slot] & 0x00C0) >> 6;
-	TDCMant[delay][event][slot] = TDCtestRead[delay][event][slot] & 0x003F;
-	TDCCharge[delay][event][slot] = LookupCharge(TDCRange[delay][0][slot], TDCMant[delay][0][slot]);
-
-	//cout << "Read: " << TDCtestRead[delay][event][slot] << ", CapID: " << TDCCapID[delay][event][slot] << ", TDC: " << TDC[delay][event][slot];
-	//cout << ", Range: " << TDCRange[delay][event][slot] << ", Mant: " << TDCMant[delay][event][slot] << endl;
-
+      for(int event = 0; event < 4; event++) 
+      {
+	  for(int slot=0; slot < 22; slot++) 
+	  {
+	      TDCCapID[delay][event][slot]    = (TDCtestRead[delay][event][slot] & 0xC000) >> 14;
+	      TDC[delay][event][slot]         = (TDCtestRead[delay][event][slot] & 0x3F00) >> 8;
+	      TDCRange[delay][event][slot]    = (TDCtestRead[delay][event][slot] & 0x00C0) >> 6;
+	      TDCMant[delay][event][slot] = TDCtestRead[delay][event][slot] & 0x003F;
+	      TDCCharge[delay][event][slot] = LookupCharge(TDCRange[delay][0][slot], TDCMant[delay][0][slot]);
+	  }
       }
-    }
   }
 
   //DCH setup the ouput file
@@ -1312,48 +1329,43 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   OutHtml << "<table cellspacing=\"\" cellpading=\"\" border=\"\" align=\"center\" >" << endl;
   OutHtml << "" << endl;
   
-  //OutHtml << "<TR align='center'><TD align='center'> Response </TD><TD>DNL</TD></TR>" << endl;
   OutHtml << "<TR>"<< endl;
 
   bool found = kFALSE;
 
   double Sum2[255], Sum3[255], Sum4[255], Sum5[255];
-  
+  for(int delay=0; delay<255; delay++) 
+  {
+      Sum2[delay] = 0;
+      Sum3[delay] = 0;
+      Sum4[delay] = 0;
+      Sum5[delay] = 0;
 
-  for(int delay=0; delay<255; delay++) {
-
-    Sum2[delay] = 0;
-    Sum3[delay] = 0;
-    Sum4[delay] = 0;
-    Sum5[delay] = 0;
-
-    found = kFALSE;
-    for(int i=3; i<22; i++) {
+      found = kFALSE;
+      for(int i=3; i<22; i++) 
+      {
+	  if(TDC[delay][0][i]==63) continue;
       
-      if(TDC[delay][0][i]==63) continue;
-      
-      //cout << TDC[delay][0][i] << endl;
-      if(found != kTRUE) {
-	inTDC[delay] = TDC[delay][0][i];
+	  //cout << TDC[delay][0][i] << endl;
+	  if(found != kTRUE) 
+	  {
+	      inTDC[delay] = TDC[delay][0][i];
+	      for(int k=0; k < 5; k++) 
+	      {
+		  if(k<2 && (i+k < 22)) Sum2[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
+		  if(k<3 && (i+k < 22)) Sum3[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
+		  if(k<4 && (i+k < 22)) Sum4[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
+		  if(i+k < 22) Sum5[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
+	      }
+	  }
+	  found = kTRUE;
 
-	for(int k=0; k < 5; k++) {
-	  if(k<2 && (i+k < 22)) Sum2[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
-	  if(k<3 && (i+k < 22)) Sum3[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
-	  if(k<4 && (i+k < 22)) Sum4[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
-	  if(i+k < 22) Sum5[delay] += LookupCharge(TDCRange[delay][0][i+k], TDCMant[delay][0][i+k]);
-
-	}
+	  /// DCH line to manipulate noisy TDC data from QIE10 to reproduce "clean" data
+	  //if(delay>0) if(((inTDC[delay] > (5 + inTDC[delay-1])) && (inTDC[delay-1] > 0 ))|| ((inTDC[delay] > (5 + inTDC[delay+1])) && (inTDC[delay+1] > 0 ))) inTDC[delay] -= 8;
+	  //if(delay>0) if(inTDC[delay] < (5 + inTDC[delay-1]) && (inTDC[delay-1] > 0)) inTDC[delay] += 8;
       }
-      found = kTRUE;
-
-      /// DCH line to manipulate noisy TDC data from QIE10 to reproduce "clean" data
-      //if(delay>0) if(((inTDC[delay] > (5 + inTDC[delay-1])) && (inTDC[delay-1] > 0 ))|| ((inTDC[delay] > (5 + inTDC[delay+1])) && (inTDC[delay+1] > 0 ))) inTDC[delay] -= 8;
-      //if(delay>0) if(inTDC[delay] < (5 + inTDC[delay-1]) && (inTDC[delay-1] > 0)) inTDC[delay] += 8;
-
-    }
     
-    if(!found) cout << "Error, no pulse seen." << endl;
-
+      if(!found) cout << "Error, no pulse seen." << endl;
   }
   
   double Sum2Avg = 0;
@@ -1361,11 +1373,12 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   double Sum4Avg = 0;
   double Sum5Avg = 0;
 
-  for(int i=0; i<255; i++) {
-    Sum2Avg += Sum2[i];
-    Sum3Avg += Sum3[i];
-    Sum4Avg += Sum4[i];
-    Sum5Avg += Sum5[i];
+  for(int i=0; i<255; ++i) 
+  {
+      Sum2Avg += Sum2[i];
+      Sum3Avg += Sum3[i];
+      Sum4Avg += Sum4[i];
+      Sum5Avg += Sum5[i];
   }
   Sum2Avg /= 255;
   Sum3Avg /= 255;
@@ -1382,74 +1395,77 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   double maxSum4Diff = 0;
   double maxSum5Diff = 0;
 
-  for(int i=0; i<255; i++) {
-    Sum2DNL[i] = (Sum2Avg - Sum2[i])/Sum2Avg;
-    Sum3DNL[i] = (Sum3Avg - Sum3[i])/Sum3Avg;
-    Sum4DNL[i] = (Sum4Avg - Sum4[i])/Sum4Avg;
-    Sum5DNL[i] = (Sum5Avg - Sum5[i])/Sum5Avg;
-
-    if(abs(Sum2Avg - Sum2[i]) > maxSum2Diff) maxSum2Diff = abs(Sum2Avg - Sum2[i]);
-    if(abs(Sum3Avg - Sum3[i]) > maxSum3Diff) maxSum3Diff = abs(Sum3Avg - Sum3[i]); 
-    if(abs(Sum4Avg - Sum4[i]) > maxSum4Diff) maxSum4Diff = abs(Sum4Avg - Sum4[i]);
-    if(abs(Sum5Avg - Sum5[i]) > maxSum5Diff) maxSum5Diff = abs(Sum5Avg - Sum5[i]);
+  for(int i=0; i<255; ++i) 
+  {
+      Sum2DNL[i] = (Sum2Avg - Sum2[i])/Sum2Avg;
+      Sum3DNL[i] = (Sum3Avg - Sum3[i])/Sum3Avg;
+      Sum4DNL[i] = (Sum4Avg - Sum4[i])/Sum4Avg;
+      Sum5DNL[i] = (Sum5Avg - Sum5[i])/Sum5Avg;
+      
+      if(abs(Sum2Avg - Sum2[i]) > maxSum2Diff) maxSum2Diff = abs(Sum2Avg - Sum2[i]);
+      if(abs(Sum3Avg - Sum3[i]) > maxSum3Diff) maxSum3Diff = abs(Sum3Avg - Sum3[i]); 
+      if(abs(Sum4Avg - Sum4[i]) > maxSum4Diff) maxSum4Diff = abs(Sum4Avg - Sum4[i]);
+      if(abs(Sum5Avg - Sum5[i]) > maxSum5Diff) maxSum5Diff = abs(Sum5Avg - Sum5[i]);
   }
 
 
   //DCH, hard codes to create 1 vector
-  for(int delay=0; delay <255; delay++) {
+  for(int delay=0; delay <255; delay++) 
+  {  
+      if(delay < 254 && !foundInt) 
+      {
+	  if(inTDC[delay] == 49 && inTDC[delay+1] == 0) 
+	  {
+	      foundInt = 1;
+	      interval = delay+1;
+	  }
+	  else if(inTDC[delay] == 49 && inTDC[delay+1] == 1) 
+	  {
+	      foundInt = 1;
+	      interval = delay;
+	      inTDC[delay] = 0;
+	  }
+      }
+  }
     
-    if(delay < 254 && !foundInt) {
-      if(inTDC[delay] == 49 && inTDC[delay+1] == 0) {
-	foundInt = 1;
-	interval = delay+1;
+  for(int delay = 0; delay < 255; delay++) 
+  {
+      if(time[delay] < (interval/4.)) time[delay] +=24.5;
+      else if(time[delay] > (interval/4. + 24.5)) 
+      {
+	  while (time[delay] > (interval/4. + 24.5)) time[delay] -= 24.5;
       }
-      else if(inTDC[delay] == 49 && inTDC[delay+1] == 1) {
-	foundInt = 1;
-	interval = delay;
-	inTDC[delay] = 0;
-      }
+      time[delay] -= interval/4.;      
+  }
+    
+  for(int i = 0; i<255; i++) 
+  {
+      sprintf(cTemp,"PulseShape_%i", i+1);
+
+      Pulse[i] = new TH1F(cTemp,"Pulse Shape",13, 0, 13);
       
-    }
-  }
-    
-  for(int delay = 0; delay < 255; delay++) {
-
-    if(time[delay] < (interval/4.)) time[delay] +=24.5;
-    else if(time[delay] > (interval/4. + 24.5)) {
-      while (time[delay] > (interval/4. + 24.5)) time[delay] -= 24.5;
-    }
-    time[delay] -= interval/4.;
-  
-  }
-    
-  for(int i = 0; i<255; i++) {
-    sprintf(cTemp,"PulseShape_%i", i+1);
-
-    Pulse[i] = new TH1F(cTemp,"Pulse Shape",13, 0, 13);
-    
-    for(int j=0; j<13; j++) {
-      Pulse[i]->Fill(j, TDCCharge[i][0][j+3]);
-    
-    }
-
+      for(int j=0; j<13; j++) 
+      {
+	  Pulse[i]->Fill(j, TDCCharge[i][0][j+3]);
+      }      
   }
 
   double myCharge[255];
-  for(int i =0; i < 22; i++) {
-
-    for(int j=0;j<255;j++) {
-      myCharge[j] = TDCCharge[j][0][i];
-    }
-    
-    Slice[i]= new TGraph(255, time2, myCharge);
-    //Slice[i]->SetTitle("Charge per Bucket; delay; charge (fC)");
-    //Slice[i]->GetHistogram()->SetTitleOffset(1.4,"Y");
+  for(int i =0; i < 22; i++) 
+  {
+      for(int j=0;j<255;j++) 
+      {
+	  myCharge[j] = TDCCharge[j][0][i];
+      }
+      Slice[i]= new TGraph(255, time2, myCharge);
+      //Slice[i]->SetTitle("Charge per Bucket; delay; charge (fC)");
+      //Slice[i]->GetHistogram()->SetTitleOffset(1.4,"Y");
   }
   
-
-  for(int i=0; i<75; i++) {
-    time_fit[i] = time[65+i];
-    inTDC_fit[i] = inTDC[65+i];
+  for(int i=0; i<75; i++) 
+  {
+      time_fit[i] = time[65+i];
+      inTDC_fit[i] = inTDC[65+i];
   }
 
   tdcGraph = new TGraph(255, time2, inTDC);
@@ -1488,14 +1504,15 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
 
   double temp;
 
-  for( int i=0; i < 255; i++) {
-    temp = (inTDC[i] - TDCFit->Eval(time[i]));
-    if(temp > 25) temp = 50-temp;
-    if(temp < -25) temp = 50+temp;
-
-    //TDCOffset->Fill(inTDC[i] - TDCFit->Eval(time[i]));
-    TDCOffset->Fill(temp);
-    //cout << "Time:  " << time[i] << ", Read: " << inTDC[i] << ", Pred: " << TDCFit->Eval(time[i]) << ", Plot: " << 
+  for( int i=0; i < 255; i++) 
+  {
+      temp = (inTDC[i] - TDCFit->Eval(time[i]));
+      if(temp > 25) temp = 50-temp;
+      if(temp < -25) temp = 50+temp;
+      
+      //TDCOffset->Fill(inTDC[i] - TDCFit->Eval(time[i]));
+      TDCOffset->Fill(temp);
+      //cout << "Time:  " << time[i] << ", Read: " << inTDC[i] << ", Pred: " << TDCFit->Eval(time[i]) << ", Plot: " << 
   }
 
   c1->cd();
@@ -1521,16 +1538,16 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   AllSlice->SetTitle("Charge in bin; delay (ns); charge (fC)");
   //AllSlice->GetHistogram()->SetTitleOffset(1.4,"Y");
 
-  for (int i=5; i<22;i++) {
-    Slice[i]->SetMarkerColor(i-4);
-    Slice[i]->SetMarkerStyle(22);
-    //Slice[i]->SetTitle("Charge in Window; delay (ns); charge (fC)");
-    AllSlice->Add(Slice[i]);
-
-    sprintf(cTemp,"Bucket %i", i);
-
-    myLeg->AddEntry(Slice[i],cTemp,"P");
-    
+  for (int i=5; i<22;i++) 
+  {
+      Slice[i]->SetMarkerColor(i-4);
+      Slice[i]->SetMarkerStyle(22);
+      //Slice[i]->SetTitle("Charge in Window; delay (ns); charge (fC)");
+      AllSlice->Add(Slice[i]);
+      
+      sprintf(cTemp,"Bucket %i", i);
+      
+      myLeg->AddEntry(Slice[i],cTemp,"P");
   }
   
   delete c1;
@@ -1551,9 +1568,7 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   OutHtml << "</table>" << endl;
   OutHtml << "<br>" << endl;
 
-
   OutHtml << "<table cellspacing=\"\" cellpading=\"\" border=\"\" align=\"center\" >" << endl;
-
 
   OutHtml << "" << endl;
   OutHtml << "<TR align='center'> <TD align='center' colspan=3><b> Running Sum Tests </b></TD></TR>"<< endl;
@@ -1565,12 +1580,6 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   OutHtml << "</TR>" << endl;
   OutHtml << "<TR align='center'><TD>" << Sum2Avg << "</TD><TD>" << Sum3Avg << "</TD><TD>" << Sum4Avg << "</TD><TD>" << Sum5Avg << "</TD></TR>" << endl;
 
-
-  //OutHtml << "2 Bucket Sum Average: " << Sum2Avg << endl;
-  //OutHtml << "3 Bucket Sum Average: " << Sum3Avg << endl;
-  //OutHtml << "4 Bucket Sum Average: " << Sum4Avg << endl;
-
-
   BinSum2vDelay = new TGraph(255, time2, Sum2);
   BinSum3vDelay = new TGraph(255, time2, Sum3);
   BinSum4vDelay = new TGraph(255, time2, Sum4);
@@ -1580,24 +1589,23 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   BinSum3 = new TH1F("BinSum3","",25, Sum3Avg - (maxSum3Diff+100), Sum3Avg + (maxSum3Diff+100));
   BinSum4 = new TH1F("BinSum4","",25, Sum4Avg - (maxSum4Diff+100), Sum4Avg + (maxSum4Diff+100));
   BinSum5 = new TH1F("BinSum5","",25, Sum5Avg - (maxSum5Diff+100), Sum5Avg + (maxSum5Diff+100));
-  //BinSum4 = new TH1F("BinSum4","",100, 000, 10000);
 
   TH1F* DNLSum2Plot = new TH1F("DNLSum2Plot","",25, -.5, .5);
   TH1F* DNLSum3Plot = new TH1F("DNLSum3Plot","",25, -.5, .5);
   TH1F* DNLSum4Plot = new TH1F("DNLSum4Plot","",25, -.5, .5);
   TH1F* DNLSum5Plot = new TH1F("DNLSum5Plot","",25, -.5, .5);
 
-
-  for(int i=0; i<255; i++) {
-    BinSum2->Fill(Sum2[i]);
-    BinSum3->Fill(Sum3[i]);
-    BinSum4->Fill(Sum4[i]);
-    BinSum5->Fill(Sum5[i]);
-
-    DNLSum2Plot->Fill(Sum2DNL[i]);
-    DNLSum3Plot->Fill(Sum3DNL[i]);
-    DNLSum4Plot->Fill(Sum4DNL[i]);
-    DNLSum5Plot->Fill(Sum5DNL[i]);
+  for(int i=0; i<255; i++) 
+  {
+      BinSum2->Fill(Sum2[i]);
+      BinSum3->Fill(Sum3[i]);
+      BinSum4->Fill(Sum4[i]);
+      BinSum5->Fill(Sum5[i]);
+      
+      DNLSum2Plot->Fill(Sum2DNL[i]);
+      DNLSum3Plot->Fill(Sum3DNL[i]);
+      DNLSum4Plot->Fill(Sum4DNL[i]);
+      DNLSum5Plot->Fill(Sum5DNL[i]);
   }
 
   BinSum2vDelay->SetMarkerStyle(2);
@@ -1645,7 +1653,6 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   DNLSum4Plot->SetTitleOffset(1.35,"Y");
   DNLSum5Plot->SetTitleOffset(1.35,"Y");
 
-
   ///
   OutHtml << "<TR>" << endl;
   BinSum2vDelay->Draw("AP");
@@ -1688,28 +1695,25 @@ void doTDCTest(char* myfile, const string& cPathOut="output/TDCrecent") {
   OutHtml << "<table cellspacing=\"\" cellpading=\"\" border=\"\" align=\"center\" >" << endl;
   OutHtml << "" << endl;
   //OutHtml << "<TR align='center'><TD align='center'> Response </TD><TD>DNL</TD></TR>" << endl;
-  for(int i = 0; i <43; i++) {
-    OutHtml << "<TR>"<< endl;
-    for( int j=0; j<6; j++ ) {
-
-      if((i != 42) || (i== 42 && j < 3)) {
-	c1->cd();
-	Pulse[6*i+j]->Draw();
-	
-	sprintf(cTemp2,"Pulse_%d",i*6+j+1);
-	sprintf(cTemp3,"Pulse %d",i*6+j+1);
-	saveFile(c1,cTemp2,cTemp3);
+  for(int i = 0; i <43; i++) 
+  {
+      OutHtml << "<TR>"<< endl;
+      for( int j=0; j<6; j++ ) 
+      {
+	  if((i != 42) || (i== 42 && j < 3)) 
+	  {
+	      c1->cd();
+	      Pulse[6*i+j]->Draw();
+	      
+	      sprintf(cTemp2,"Pulse_%d",i*6+j+1);
+	      sprintf(cTemp3,"Pulse %d",i*6+j+1);
+	      saveFile(c1,cTemp2,cTemp3);
+	  }
       }
-      
-    }
-    OutHtml << "</TR>" << endl;
-
+      OutHtml << "</TR>" << endl;    
   }
-
-  OutHtml.close();
-
-  //cleanUp();
   
+  OutHtml.close();
 }
 
 double LookupCharge(int range, int mantissa) {
@@ -1736,9 +1740,6 @@ double LookupCharge(int range, int mantissa) {
   else result = -1;
 
   return result;
-
-  //return range*64+mantissa;
-
 }
 
 void cleanUp() {
@@ -1827,6 +1828,7 @@ bool storePed(fstream &file) {
     if(!readline(file,linenumber,data,previousline)) return 0;
   } 
   
+  // reading next 4 lines, the first three return all zeroes, so we skip those
   if(!readline(file,linenumber,data,previousline)) return 0;
   if(!readline(file,linenumber,data,previousline)) return 0;
   if(!readline(file,linenumber,data,previousline)) return 0;
@@ -1840,6 +1842,7 @@ bool storePed(fstream &file) {
   int temp;
   int CID;
 
+  // read until we reach the next part of the test
   while(data != "volts_test"){
     istringstream(data) >> hex >> temp;
       
@@ -1857,83 +1860,84 @@ bool storePed(fstream &file) {
     if(!readline(file,linenumber,data,previousline)) return 0;
   }
 
-  //cout << PedCIDCount[0] << " " << PedCIDCount[1] << " "<< PedCIDCount[2] << " " << PedCIDCount[3] << " " << endl;
+  cout << PedCIDCount[0] << " " << PedCIDCount[1] << " "<< PedCIDCount[2] << " " << PedCIDCount[3] << " " << endl;
 
+  // read until we reach the next part of the test
   while(data != ("ped_dac_test"))
-    {
+  {
       if(!readline(file,linenumber,data,previousline)) {
-	//cout << "ended 1"<< endl;
-	return 0;
+	  //cout << "ended 1"<< endl;
+	  return 0;
       }
-    }
+  }
 
   for(int ped=0; ped<64; ped++)
-    {
+  {
       //This loop is for the number of events taken.  Currently 3
-      for(int i=0; i<4; i++)
-            {
-                if(!readline(file,linenumber,data,previousline))
-                    {
-                        //cout << "ended 3"<< endl;
-                        return 0;
-                    }
-            }
-	  for(int read=0; read<129; read++)
-	    {
-	       if(!readline(file,linenumber,data,previousline))
-                    {
-                        //cout << "ended 3"<< endl;
-                        return 0;
-                    }
-	       //istringstream(data) >> hex >> PEDtestread[ped][read];
-	       istringstream(data) >> hex >> temp;
+      for(int i=0; i<4; ++i)
+      {
+	  if(!readline(file,linenumber,data,previousline))
+	  {
+	      //cout << "ended 2"  << endl;
+	      return 0;
+	  }
+      }
+      for(int read=0; read<129; ++read)
+      {
+	  if(!readline(file,linenumber,data,previousline))
+	  {
+	      //cout << "ended 3"<< endl;
+	      return 0;
+	  }
+	  //istringstream(data) >> hex >> PEDtestread[ped][read];
+	  istringstream(data) >> hex >> temp;
 	       
-	       PEDtestRange[ped][read] = (temp & 0x00C0)>>6;
-	       PEDtestMant[ped][read] = temp & 0x003F;
-	    }
-    }
+	  PEDtestRange[ped][read] = (temp & 0x00C0)>>6;
+	  PEDtestMant[ped][read] = temp & 0x003F;
+      }
+  }
 
   while(data != ("cap_ped_dac_test"))
-    {
+  {
       if(!readline(file,linenumber,data,previousline)) {
-	//cout << "ended 1"<< endl;
-	return 0;
+	  //cout << "ended 1"<< endl;
+	  return 0;
       }
-    }
-    
+  }
+  
   for(int ped=0; ped<15; ped++)
-    {
+  {
       CAPPEDtestCount[ped][0] = 0;
       CAPPEDtestCount[ped][1] = 0;
       CAPPEDtestCount[ped][2] = 0;
       CAPPEDtestCount[ped][3] = 0;
-
+      
       //This loop is for the number of events taken.  Currently 3
       for(int i=0; i<4; i++)
-	{
+      {
 	  if(!readline(file,linenumber,data,previousline))
-	    {
+	  {
 	      //cout << "ended 3"<< endl;
 	      return 0;
-	    }
-	}
+	  }
+      }
       for(int read=0; read<129; read++)
-	{
+      {
 	  if(!readline(file,linenumber,data,previousline))
-	    {
+	  {
 	      //cout << "ended 3"<< endl;
 	      return 0;
-	    }
+	  }
 	  //istringstream(data) >> hex >> CAPPEDtestread[ped][read];
 	  istringstream(data) >> hex >> temp;
 	  
 	  CID = (temp & 0xC000) >> 14;
-  
+	  
 	  CAPPEDtestRange[ped][CID][CAPPEDtestCount[ped][CID]] = (temp & 0x00C0)>>6;
 	  CAPPEDtestMant[ped][CID][CAPPEDtestCount[ped][CID]++] = temp & 0x003F; 
-
-	}
-    }
+	  
+      }
+  }
   
 
   return 1;

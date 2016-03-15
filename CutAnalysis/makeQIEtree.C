@@ -12,6 +12,8 @@ map<string, int> vars;
 
 TTree* tree;
 
+bool isQIE11 = true;
+
 //DCH declare the event objects
 int ChipStatus;
 int ChipID;
@@ -1006,63 +1008,73 @@ void ResetVarMap() {
     ChipStatus=-1;
     ChipID=0;
 
-    // First group of variables, only one value per cut
-    for (int i = 1; i <= 49; ++i)
+    if(isQIE11)
     {
-	vars[to_string(i) + "_1"] = 0;
-    }
+	std::vector<std::string> cuts = {"1_1","2_1","3_1","4_1","14_1","15_1","16_1","17_1","85_1","144_1","145_1","146_1","147_1","148_1","149_1","5_1","6_1","7_1","8_1","9_1","10_1","11_1","12_1","13_1","18_1","19_1","20_1","21_1","22_1","23_1","24_1","25_1","26_1","27_1","28_1","29_1","30_1","31_1","32_1","33_1","34_1","35_1","36_1","37_1","38_1","39_1","40_1","41_1","42_1","43_1","44_1","45_1","46_1","47_1","48_1","49_1","51_1","52_1","53_1","54_1","55_1","56_1","57_1","58_1","59_1","60_1","61_1","62_1","192_1","193_1","193_2","193_3","193_4","193_5","193_6","193_7","193_8","193_9","193_10","193_11","193_12","193_13","193_14","193_15","193_16","193_17","193_18","193_19","193_20","193_21","193_22","193_23","193_24","193_25","193_26","193_27","193_28","193_29","193_30","193_31","193_32","193_33","193_34","193_35","193_36","193_37","193_38","193_39","193_40","193_41","193_42","193_43","193_44","193_45","193_46","193_47","193_48","193_49","193_50","193_51","193_52","193_53","193_54","193_55","193_56","193_57","193_58","193_59","193_60","193_61","193_62","193_63","193_64","193_65","193_66","193_67","193_68","193_69","193_70","193_71","193_72","193_73","193_74","193_75","193_76","193_77","193_78","193_79","193_80","193_81","193_82","193_83","193_84","193_85","193_86","193_87","193_88","193_89","193_90","193_91","193_92","193_93","193_94","193_95","193_96","193_97","193_98","193_99","193_100","193_101","193_102","193_103","193_104","193_105","193_106","193_107","193_108","193_109","193_110","193_111","193_112","193_113","193_114","193_115","193_116","193_117","193_118","193_119","193_120","193_121","193_122","193_123","193_124","193_125","193_126","193_127","193_128","193_129","193_130","193_131","193_132","193_133","193_134","193_135","193_136","193_137","193_138","193_139","193_140","193_141","193_142","193_143","193_144","193_145","193_146","193_147","193_148","193_149","193_150","193_151","193_152","193_153","193_154","193_155","193_156","193_157","193_158","193_159","193_160","193_161","193_162","193_163","193_164","193_165","193_166","193_167","193_168","193_169","193_170","193_171","193_172","193_173","193_174","193_175","193_176","193_177","193_178","193_179","193_180","193_181","193_182","193_183","193_184","193_185","193_186","193_187","193_188","193_189","193_190","193_191","193_192","193_193","193_194","193_195","193_196","193_197","193_198","193_199","193_200","193_201","193_202","193_203","193_204","193_205","193_206","193_207","193_208","193_209","193_210","193_211","193_212","193_213","193_214","193_215","193_216","193_217","193_218","193_219","193_220","193_221","193_222","193_223","193_224","193_225","193_226","193_227","193_228","193_229","193_230","193_231","193_232","193_233","193_234","193_235","193_236","193_237","193_238","193_239","193_240","193_241","193_242","193_243","193_244","193_245","193_246","193_247","193_248","193_249","193_250","193_251","193_252","193_253","193_254","193_255","190_1","191_1","191_2","191_3","191_4","191_5","191_6","191_7","191_8","191_9","191_10","191_11","191_12","191_13","191_14","191_15","191_16","191_17","191_18","191_19","191_20","191_21","191_22","191_23","191_24","191_25","191_26","191_27","191_28","191_29","191_30","191_31","191_32","191_33","191_34","191_35","191_36","191_37","191_38","191_39","191_40","191_41","191_42","191_43","191_44","191_45","191_46","191_47","191_48","191_49","191_50","191_51","191_52","191_53","191_54","191_55","191_56","191_57","191_58","191_59","191_60","191_61","191_62","191_63","191_64","191_65","191_66","191_67","191_68","191_69","191_70","191_71","191_72","191_73","191_74","191_75","191_76","191_77","191_78","191_79","191_80","191_81","191_82","191_83","191_84","191_85","191_86","191_87","191_88","191_89","191_90","191_91","191_92","191_93","191_94","191_95","191_96","191_97","191_98","191_99","191_100","191_101","191_102","191_103","191_104","191_105","191_106","191_107","191_108","191_109","191_110","191_111","191_112","191_113","191_114","191_115","191_116","191_117","191_118","191_119","191_120","191_121","191_122","191_123","191_124","191_125","191_126","191_127","191_128","191_129","191_130","191_131","191_132","191_133","191_134","191_135","191_136","191_137","191_138","191_139","191_140","191_141","191_142","191_143","191_144","191_145","191_146","191_147","191_148","191_149","191_150","191_151","191_152","191_153","191_154","191_155","191_156","191_157","191_158","191_159","191_160","191_161","191_162","191_163","191_164","191_165","191_166","191_167","191_168","191_169","191_170","191_171","191_172","191_173","191_174","191_175","191_176","191_177","191_178","191_179","191_180","191_181","191_182","191_183","191_184","191_185","191_186","191_187","191_188","191_189","191_190","191_191","191_192","191_193","191_194","191_195","191_196","191_197","191_198","191_199","191_200","191_201","191_202","191_203","191_204","191_205","191_206","191_207","191_208","191_209","191_210","191_211","191_212","191_213","191_214","191_215","191_216","191_217","191_218","191_219","191_220","191_221","191_222","191_223","191_224","191_225","191_226","191_227","191_228","191_229","191_230","191_231","191_232","191_233","191_234","191_235","191_236","191_237","191_238","191_239","191_240","191_241","191_242","191_243","191_244","191_245","191_246","191_247","191_248","191_249","191_250","191_251","191_252","191_253","191_254","191_255","186_1","186_2","186_3","186_4","189_1","189_2","189_3","189_4","187_1","187_2","188_1","188_2","188_3","188_4","150_1","150_2","150_3","150_4","151_1","151_2","151_3","151_4","152_1","152_2","152_3","152_4","153_1","153_2","153_3","153_4","154_1","154_2","154_3","154_4","155_1","155_2","155_3","155_4","156_1","156_2","156_3","156_4","157_1","157_2","157_3","157_4","158_1","158_2","158_3","158_4","159_1","159_2","159_3","159_4","160_1","160_2","160_3","160_4","161_1","161_2","161_3","161_4","162_1","162_2","162_3","162_4","163_1","163_2","163_3","163_4","164_1","164_2","164_3","164_4","165_1","165_2","165_3","165_4","166_1","166_2","166_3","166_4","167_1","167_2","167_3","167_4","168_1","168_2","168_3","168_4","169_1","169_2","169_3","169_4","170_1","170_2","170_3","170_4","171_1","171_2","171_3","171_4","172_1","172_2","172_3","172_4","173_1","173_2","173_3","173_4","174_1","174_2","174_3","174_4","175_1","175_2","175_3","175_4","176_1","176_2","176_3","176_4","177_1","177_2","177_3","177_4","178_1","178_2","178_3","178_4","179_1","179_2","179_3","179_4","180_1","180_2","180_3","180_4","181_1","181_2","181_3","181_4","182_1","182_2","182_3","182_4","182_5","182_6","182_7","182_8","182_9","182_10","182_11","182_12","182_13","182_14","182_15","182_16","182_17","182_18","182_19","182_20","182_21","182_22","182_23","182_24","182_25","182_26","182_27","182_28","182_29","182_30","182_31","182_32","182_33","182_34","182_35","182_36","182_37","182_38","182_39","182_40","182_41","182_42","182_43","182_44","182_45","182_46","182_47","182_48","182_49","182_50","182_51","182_52","182_53","182_54","182_55","182_56","182_57","182_58","182_59","182_60","182_61","182_62","183_1","183_2","183_3","183_4","184_1","184_2","184_3","184_4","185_1","185_2","185_3","185_4","77_1","78_1","79_1","80_1","81_1","82_1","83_1","84_1","72_1","73_1","63_1","64_1","65_1","66_1","67_1","68_1","69_1","70_1","71_1","74_1","75_1","76_1","110_1","111_1","112_1","113_1","114_1","115_1","116_1","117_1","118_1","119_1","120_1","121_1","122_1","123_1","124_1","125_1","126_1","127_1","128_1","129_1","130_1","131_1","132_1","133_1","134_1","135_1","136_1","137_1","94_1","95_1","96_1","97_1","98_1","99_1","100_1","101_1","102_1","103_1","138_1","139_1","140_1","141_1","142_1","143_1","87_1","87_2","87_3","87_4","87_5","87_6","87_7","87_8","87_9","87_10","87_11","87_12","87_13","87_14","87_15","87_16","87_17","87_18","86_1","86_2","86_3","86_4","86_5","86_6","86_7","86_8","86_9","86_10","86_11","86_12","86_13","86_14","86_15","86_16","86_17","86_18","89_1","89_2","89_3","89_4","89_5","89_6","89_7","89_8","89_9","89_10","89_11","89_12","89_13","89_14","89_15","89_16","89_17","89_18","88_1","88_2","88_3","88_4","88_5","88_6","88_7","88_8","88_9","88_10","88_11","88_12","88_13","88_14","88_15","88_16","88_17","88_18","91_1","91_2","91_3","91_4","91_5","91_6","91_7","91_8","91_9","91_10","91_11","91_12","91_13","91_14","91_15","91_16","91_17","91_18","90_1","90_2","90_3","90_4","90_5","90_6","90_7","90_8","90_9","90_10","90_11","90_12","90_13","90_14","90_15","90_16","90_17","90_18","93_1","93_2","93_3","93_4","93_5","93_6","93_7","93_8","93_9","93_10","93_11","93_12","93_13","93_14","93_15","93_16","93_17","93_18","92_1","92_2","92_3","92_4","92_5","92_6","92_7","92_8","92_9","92_10","92_11","92_12","92_13","92_14","92_15","92_16","92_17","92_18","50_1","50_2","50_3","50_4","107_1","107_2","108_1","108_2","109_1","109_2","106_1","106_2","195_1","196_1","196_2","196_3","196_4","196_5","196_6","196_7","196_8","196_9","196_10","196_11","196_12","196_13","196_14","196_15","196_16","196_17","196_18","196_19","196_20","196_21","196_22","196_23","196_24","196_25","196_26","196_27","196_28","196_29","196_30","196_31","196_32","196_33","196_34","196_35","196_36","196_37","196_38","196_39","196_40","196_41","196_42","196_43","196_44","196_45","196_46","196_47","196_48","196_49","196_50","196_51","196_52","196_53","196_54","196_55","196_56","196_57","196_58","196_59","196_60","196_61","196_62","196_63","196_64","196_65","196_66","196_67","196_68","196_69","196_70","196_71","196_72","196_73","196_74","196_75","196_76","196_77","196_78","196_79","196_80","196_81","196_82","196_83","196_84","196_85","196_86","196_87","196_88","196_89","196_90","196_91","196_92","196_93","196_94","196_95","196_96","196_97","196_98","196_99","196_100"};
+	for (string& cut : cuts)
+	{
+	    vars[cut] = 0;
+	}
+    } 
+    else
+    {
+	// First group of variables, only one value per cut
+	for (int i = 1; i <= 49; ++i)
+	{
+	    vars[to_string(i) + "_1"] = 0;
+	}
     
-    vars["50_1"] = 0;
-    vars["50_2"] = 0;
-    vars["50_3"] = 0;
-    vars["50_4"] = 0;
+	vars["50_1"] = 0;
+	vars["50_2"] = 0;
+	vars["50_3"] = 0;
+	vars["50_4"] = 0;
 
-    for (int i = 51; i <= 85; ++i)
-    {
-	vars[to_string(i) + "_1"] = 0;
-    }
-
-    for (int i = 86; i <= 93; ++i)
-    {
-	for (int j = 1; j <= 18; ++j)
+	for (int i = 51; i <= 85; ++i)
 	{
-	    vars[to_string(i) + "_" + to_string(j)] = 0;
+	    vars[to_string(i) + "_1"] = 0;
+	}
+
+	for (int i = 86; i <= 93; ++i)
+	{
+	    for (int j = 1; j <= 18; ++j)
+	    {
+		vars[to_string(i) + "_" + to_string(j)] = 0;
+	    }
+	}
+
+	for (int i = 94; i <= 181; ++i)
+	{
+	    vars[to_string(i) + "_1"] = 0;
+	}
+
+	for (int i = 150; i <= 181; ++i)
+	{
+	    for (int j = 2; j <= 4; ++j)
+	    {
+		vars[to_string(i) + "_" + to_string(j)] = 0;
+	    }
+	}
+
+	vars["182_1"] = 0;
+
+	for (int i = 183; i <= 189; ++i)
+	{
+	    if(i == 187)
+		continue;
+	    for (int j = 1; j <= 4; ++j)
+	    {
+		vars[to_string(i) + "_" + to_string(j)] = 0;
+	    }
+	}
+
+	vars["187_1"] = 0;
+	vars["187_2"] = 0;
+
+	for (int i = 190; i <= 200; ++i)
+	{
+	    vars[to_string(i) + "_1"] = 0;
 	}
     }
-
-    for (int i = 94; i <= 181; ++i)
-    {
-	vars[to_string(i) + "_1"] = 0;
-    }
-
-    for (int i = 150; i <= 181; ++i)
-    {
-	for (int j = 2; j <= 4; ++j)
-	{
-	    vars[to_string(i) + "_" + to_string(j)] = 0;
-	}
-    }
-
-    vars["182_1"] = 0;
-
-    for (int i = 183; i <= 189; ++i)
-    {
-	if(i == 187)
-	    continue;
-	for (int j = 1; j <= 4; ++j)
-	{
-	    vars[to_string(i) + "_" + to_string(j)] = 0;
-	}
-    }
-
-    vars["187_1"] = 0;
-    vars["187_2"] = 0;
-
-    for (int i = 190; i <= 200; ++i)
-    {
-	vars[to_string(i) + "_1"] = 0;
-    }
-
 }
 
 void ResetVariables() {
@@ -1514,35 +1526,14 @@ void ResetVariables() {
 
 }
 
-
-//int get_int(const string& s) {
-//
-//    stringstream ss(s);
-//    int ret;
-//    ss >> ret;
-//
-//    return ret;
-//
-//}
-//
-//double get_double(const string& s) {
-//
-//    stringstream ss(s);
-//    double ret;
-//    ss >> ret;
-//
-//    return ret;
-//
-//}
-
 int makeUsInt(string input) {
-    //cout << "in makeUSint" << endl;
+    //cout << "in makeUSint, with input " << input << endl;
     return stoi(input);
 }
 
 int makeSInt(string input) {
 
-    //cout << "in makeSInt" << endl;
+    //cout << "in makeSInt, with input " << input << endl;
 
     stringstream stream;
     stream << setfill('0') << setw(4) << hex << stoi(input);
@@ -1554,8 +1545,6 @@ int makeSInt(string input) {
 
 }
 
-
-
 string intToHex(int i) {
 
     stringstream stream;
@@ -1565,6 +1554,7 @@ string intToHex(int i) {
 }
 
 int convertHexToInt(string myhex, bool sign) {
+    cout << "in convertHexToInt with myhex " << myhex << endl;
     if(sign) {
 	if(stoi(myhex,0,16) < 32768) {
 	    //cout << stoi(myhex,0,16) << endl;
@@ -1611,69 +1601,57 @@ double LookupDAC(int DAC, int whichRes) {
 
 void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 
-    //cout << "DEBUG: Starting..." << endl;
     TFile hfile(outFile,"RECREATE");
-    //cout << "DEBUG: Opened output file" << endl;
 
     BookTree();
-    //cout << "DEBUG: Booked Tree" << endl;
     ResetVarMap();
-
 
     ifstream input(inFile);
     string line;
   
-    //cout << "DEBUG: opened input file" << endl;
-
     int counter = 0;
     int varnum = 0;
   
     //cout << "DEBUG: beginning loop over input lines" << endl;
-    while(getline(input, line)) {
-
-	//cout << "DEBUG: Resetting variables" << endl;
+    while(getline(input, line)) 
+    {
 	ResetVariables();
-	//cout << "DEBUG: Variables reset" << endl;
-	//ResetVarMap();
 
 	stringstream ss(line);
 	string field;
 
 	counter++;
-	if(counter <2) continue;
-	if(counter == 2) {
 
-	    //int varnum = 0;
-      
-	    while(getline(ss, field, ',')) {
+	// skip first line containing cut numbers
+	if(counter <2) continue;
+
+	// second line contains cuts
+	if(counter == 2) 
+	{
+	    while(getline(ss, field, ',')) 
+	    {
 		varnum++;
-		if(varnum==1) continue;
-		vars[field]=varnum+1;
-	
+		if(varnum==1) continue; // Skip the "Cuts" entry
+		vars[field]=varnum; // "field" from the dataset doesn't correspond to what is in ResetVarMap()...
 	    }
 	    cout << "varNum: " << varnum << endl;
 	    //cout << "got Vars set" << endl;
 	    continue;
 	}
 
-	//stringstream ss(line);
 	vector<string> v;
 	v.clear();
-	//string field;
 	//cout << "DEBUG Starting loop over CSV entries" << endl;
-	v.push_back("65536");
-	while(getline(ss, field, ',')) {
+	//v.push_back("65536");
+	while(getline(ss, field, ',')) 
+	{
 	    v.push_back(field);
-      
 	}
-    
-	//if(v.size() < 1014) {
-	if((int)v.size() < (varnum+1)) {
-	    //tree->Fill();
-	    continue;
-	}
+
+	if((int)v.size() < (varnum+1)) continue;
     
 	//cout << "DEBUG: Parsed input" << endl;
+	// Didn't we just put 65536 in the vector?? How can it equal Pass??
 	if(v[0] == "Pass") ChipStatus = 1;
 	else ChipStatus = 0;
     
@@ -1691,6 +1669,8 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	Volt_IDCSet = getVoltOBD(makeSInt(v[vars["11_1"]]));
 	Volt_InSig = getVoltOBD(makeSInt(v[vars["12_1"]]));
 	Volt_InRef = getVoltOBD(makeSInt(v[vars["13_1"]]));
+	
+	// What about 14_1: RRef narrow and 15_1: All Mantissa errors ??
     
 	IDCset00 = getVoltOBD(makeSInt(v[vars["18_1"]]));
 	IDCset01 = getVoltOBD(makeSInt(v[vars["19_1"]]));
@@ -1724,13 +1704,12 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	IDCset1d = getVoltOBD(makeSInt(v[vars["47_1"]]));
 	IDCset1e = getVoltOBD(makeSInt(v[vars["48_1"]]));
 	IDCset1f = getVoltOBD(makeSInt(v[vars["49_1"]]));
-    
+
 	LVDS_AvgMid_1 = getVoltOBD(makeSInt(v[vars["50_1"]]));
 	LVDS_AvgMid_2 = getVoltOBD(makeSInt(v[vars["50_2"]]));
 	LVDS_AvgMid_3 = getVoltOBD(makeSInt(v[vars["50_3"]]));
 	LVDS_AvgMid_4 = getVoltOBD(makeSInt(v[vars["50_4"]]));
-	//LVDS_AvgMid_5 = getVoltOBD(makeSInt(v[55]));
-	//LVDS_AvgMid_6 = getVoltOBD(makeSInt(v[56]));
+	
     
 	SumRange0 = makeUsInt(v[vars["51_1"]]); //Sum in fC
 	SumRange1 = makeUsInt(v[vars["52_1"]]);
@@ -1746,7 +1725,7 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	SumDAC5 = makeUsInt(v[vars["60_1"]]);
 	SumDAC6 = makeUsInt(v[vars["61_1"]]);
 	SumDAC7 = makeUsInt(v[vars["62_1"]]);
-    
+
 	//Cuts 63-71
 	ThreshDAC0  = LookupDAC(makeUsInt(v[vars["63_1"]]),0)/25; //DAC value to fire thresh
 	ThreshDAC1  = LookupDAC(makeUsInt(v[vars["64_1"]]),0)/25;
@@ -1757,27 +1736,19 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	ThreshDAC20 = LookupDAC(makeUsInt(v[vars["69_1"]]),0)/25;
 	ThreshDAC40 = LookupDAC(makeUsInt(v[vars["70_1"]]),1)/25;
 	ThreshDAC80 = LookupDAC(makeUsInt(v[vars["71_1"]]),1)/25;
-    
+	
 	//Cuts 72-73
 	LockTime120Mhz = makeUsInt(v[vars["72_1"]])*100; //ns
 	LockTime1Mhz = makeUsInt(v[vars["73_1"]])*100; //ns
-    
+	
 	//Cut 74
 	InSigV = getVoltOBD(makeSInt(v[vars["74_1"]]));
-    
+	
 	//Cut75 + 76
 	InRefV = getVoltOBD(makeSInt(v[vars["75_1"]]));
 	DiffInSigInRef = getVoltOBD(makeSInt(v[vars["76_1"]])) - 2.5;
     
 	//Cuts 77-84
-	//TimingInRefDAC0 = getVoltOBD(makeSInt(v[vars["77_1"]]));
-	//TimingInRefDAC1 = getVoltOBD(makeSInt(v[vars["78_1"]]));
-	//TimingInRefDAC2 = getVoltOBD(makeSInt(v[vars["79_1"]]));
-	//TimingInRefDAC3 = getVoltOBD(makeSInt(v[vars["80_1"]]));
-	//TimingInRefDAC4 = getVoltOBD(makeSInt(v[vars["81_1"]]));
-	//TimingInRefDAC5 = getVoltOBD(makeSInt(v[vars["82_1"]]));
-	//TimingInRefDAC6 = getVoltOBD(makeSInt(v[vars["83_1"]]));
-	//TimingInRefDAC7 = getVoltOBD(makeSInt(v[vars["84_1"]]));    
 	TimingInRefDAC0 = LookupDAC(makeUsInt(v[vars["77_1"]]),0)/25;
 	TimingInRefDAC1 = LookupDAC(makeUsInt(v[vars["78_1"]]),0)/25;
 	TimingInRefDAC2 = LookupDAC(makeUsInt(v[vars["79_1"]]),0)/25;
@@ -1786,7 +1757,7 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	TimingInRefDAC5 = LookupDAC(makeUsInt(v[vars["82_1"]]),0)/25;
 	TimingInRefDAC6 = LookupDAC(makeUsInt(v[vars["83_1"]]),0)/25;
 	TimingInRefDAC7 = LookupDAC(makeUsInt(v[vars["84_1"]]),0)/25;
-
+	
 	//All the LVDS pins here
 	LVDSTrim0Hi_pin01 = getVoltOBD(makeSInt(v[vars["86_1"]]));
 	LVDSTrim0Hi_pin02 = getVoltOBD(makeSInt(v[vars["86_2"]]));
@@ -1828,7 +1799,7 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	LVDSTrim0Lo_pin18 = getVoltOBD(makeSInt(v[vars["87_18"]]));
 	//LVDSTrim0Lo_pin19 = getVoltOBD(makeSInt(v[10]));
 	//LVDSTrim0Lo_pin20 = getVoltOBD(makeSInt(v[10]));
-    
+	
 	LVDSTrim1Hi_pin01 = getVoltOBD(makeSInt(v[vars["88_1"]]));
 	LVDSTrim1Hi_pin02 = getVoltOBD(makeSInt(v[vars["88_2"]]));
 	LVDSTrim1Hi_pin03 = getVoltOBD(makeSInt(v[vars["88_3"]]));
@@ -1869,7 +1840,7 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	LVDSTrim1Lo_pin18 = getVoltOBD(makeSInt(v[vars["89_18"]]));
 	//LVDSTrim0Lo_pin19 = getVoltOBD(makeSInt(v[10]));
 	//LVDSTrim0Lo_pin20 = getVoltOBD(makeSInt(v[10]));
-
+	
 	LVDSTrim2Hi_pin01 = getVoltOBD(makeSInt(v[vars["90_1"]]));
 	LVDSTrim2Hi_pin02 = getVoltOBD(makeSInt(v[vars["90_2"]]));
 	LVDSTrim2Hi_pin03 = getVoltOBD(makeSInt(v[vars["90_3"]]));
@@ -1910,7 +1881,7 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	LVDSTrim2Lo_pin18 = getVoltOBD(makeSInt(v[vars["91_18"]]));
 	//LVDSTrim0Lo_pin19 = getVoltOBD(makeSInt(v[10]));
 	//LVDSTrim0Lo_pin20 = getVoltOBD(makeSInt(v[10]));
-
+	
 	LVDSTrim3Hi_pin01 = getVoltOBD(makeSInt(v[vars["92_1"]]));
 	LVDSTrim3Hi_pin02 = getVoltOBD(makeSInt(v[vars["92_2"]]));
 	LVDSTrim3Hi_pin03 = getVoltOBD(makeSInt(v[vars["92_3"]]));
@@ -1951,254 +1922,268 @@ void MakeTupleFromCutsMaker(const char* inFile, const char* outFile) {
 	LVDSTrim3Lo_pin18 = getVoltOBD(makeSInt(v[vars["93_18"]]));
 	//LVDSTrim0Lo_pin19 = getVoltOBD(makeSInt(v[10]));
 	//LVDSTrim0Lo_pin20 = getVoltOBD(makeSInt(v[10]));
-
-	//Cuts 94-103
-	ImpDiff_RinSel0 = (getVoltOBD(makeSInt(v[vars["94_1"]])) - 2.5)/0.000181654;
-	InSigMClampDiff_RinSel0 = getVoltOBD(makeSInt(v[vars["95_1"]])) - 2.5;
-	ImpDiff_RinSel1 = (getVoltOBD(makeSInt(v[vars["96_1"]])) - 2.5)/0.000181654;
-	InSigMClampDiff_RinSel1 = getVoltOBD(makeSInt(v[vars["97_1"]])) - 2.5;
-	ImpDiff_RinSel2 = (getVoltOBD(makeSInt(v[vars["98_1"]])) - 2.5)/0.000181654;
-	InSigMClampDiff_RinSel2 = getVoltOBD(makeSInt(v[vars["99_1"]])) - 2.5;
-	ImpDiff_RinSel4 = (getVoltOBD(makeSInt(v[vars["100_1"]])) - 2.5)/0.000181654;
-	InSigMClampDiff_RinSel4 = getVoltOBD(makeSInt(v[vars["101_1"]])) - 2.5;
-	ImpDiff_RinSel8 = (getVoltOBD(makeSInt(v[vars["102_1"]])) - 2.5)/0.000181654;
-	InSigMClampDiff_RinSel8 = getVoltOBD(makeSInt(v[vars["103_1"]])) - 2.5;
-	ImpDiff_RinSelF = (getVoltOBD(makeSInt(v[vars["104_1"]])) - 2.5)/0.000181654;
+	
+	if(vars.find("94_1") != vars.end())
+	{
+	    //Cuts 94-103
+	    ImpDiff_RinSel0 = (getVoltOBD(makeSInt(v[vars["94_1"]])) - 2.5)/0.000181654;
+	    InSigMClampDiff_RinSel0 = getVoltOBD(makeSInt(v[vars["95_1"]])) - 2.5;
+	    ImpDiff_RinSel1 = (getVoltOBD(makeSInt(v[vars["96_1"]])) - 2.5)/0.000181654;
+	    InSigMClampDiff_RinSel1 = getVoltOBD(makeSInt(v[vars["97_1"]])) - 2.5;
+	    ImpDiff_RinSel2 = (getVoltOBD(makeSInt(v[vars["98_1"]])) - 2.5)/0.000181654;
+	    InSigMClampDiff_RinSel2 = getVoltOBD(makeSInt(v[vars["99_1"]])) - 2.5;
+	    ImpDiff_RinSel4 = (getVoltOBD(makeSInt(v[vars["100_1"]])) - 2.5)/0.000181654;
+	    InSigMClampDiff_RinSel4 = getVoltOBD(makeSInt(v[vars["101_1"]])) - 2.5;
+	    ImpDiff_RinSel8 = (getVoltOBD(makeSInt(v[vars["102_1"]])) - 2.5)/0.000181654;
+	    InSigMClampDiff_RinSel8 = getVoltOBD(makeSInt(v[vars["103_1"]])) - 2.5;
+	    if(!isQIE11)
+		ImpDiff_RinSelF = (getVoltOBD(makeSInt(v[vars["104_1"]])) - 2.5)/0.000181654;
 		       
-	WRPmax = makeUsInt(v[vars["106_1"]])/10000.;
-	WRPRange01 = makeUsInt(v[vars["107_1"]])/10000.;
-	WRPRange12 = makeUsInt(v[vars["108_1"]])/10000.;
-	WRPRange23 = makeUsInt(v[vars["109_1"]])/10000.;
-
-	//Cuts 110-137
-	lADC00_Dat0      = getVoltOBD(makeSInt(v[vars["110_1"]]));
-	lADC01_Dat3      = getVoltOBD(makeSInt(v[vars["111_1"]]));
-	lADC02_Dat6      = getVoltOBD(makeSInt(v[vars["112_1"]]));
-	lADC03_Disc      = getVoltOBD(makeSInt(v[vars["113_1"]]));
-	lADC10_Dat0Bar   = getVoltOBD(makeSInt(v[vars["114_1"]]));
-	lADC11_Dat3Bar   = getVoltOBD(makeSInt(v[vars["115_1"]]));
-	lADC12_Dat6Bar   = getVoltOBD(makeSInt(v[vars["116_1"]]));
-	lADC13_DiscBar   = getVoltOBD(makeSInt(v[vars["117_1"]]));
-	lADC20_Dat1      = getVoltOBD(makeSInt(v[vars["118_1"]]));
-	lADC21_Dat4      = getVoltOBD(makeSInt(v[vars["119_1"]]));
-	lADC22_Dat7      = getVoltOBD(makeSInt(v[vars["120_1"]]));
-	lADC23_Rref      = getVoltOBD(makeSInt(v[vars["121_1"]]));
-	lADC30_Dat1Bar   = getVoltOBD(makeSInt(v[vars["122_1"]]));
-	lADC31_Dat4Bar   = getVoltOBD(makeSInt(v[vars["123_1"]]));
-	lADC32_Dat7Bar   = getVoltOBD(makeSInt(v[vars["124_1"]]));
-	lADC33_IDCset    = getVoltOBD(makeSInt(v[vars["125_1"]]));
-	lADC40_Dat2      = getVoltOBD(makeSInt(v[vars["126_1"]]));
-	lADC41_Dat5      = getVoltOBD(makeSInt(v[vars["127_1"]]));
-	lADC42_ClkOut    = getVoltOBD(makeSInt(v[vars["128_1"]]));
-	lADC43_InSig     = getVoltOBD(makeSInt(v[vars["129_1"]]));
-	lADC50_Dat2Bar   = getVoltOBD(makeSInt(v[vars["130_1"]]));
-	lADC51_Dat5Bar   = getVoltOBD(makeSInt(v[vars["131_1"]]));
-	lADC52_ClkOutBar = getVoltOBD(makeSInt(v[vars["132_1"]]));
-	lADC53_InRef     = getVoltOBD(makeSInt(v[vars["133_1"]]));
-	lADC60_IsetP     = getVoltOBD(makeSInt(v[vars["134_1"]]));
-	lADC61_33V       = getVoltOBD(makeSInt(v[vars["135_1"]]));
-	lADC62_50V       = getVoltOBD(makeSInt(v[vars["136_1"]]));
-	lADC63_Clamp     = getVoltOBD(makeSInt(v[vars["137_1"]]));
-
-	gsel00 = makeUsInt(v[vars["138_1"]])/16;
-	gsel01 = makeUsInt(v[vars["139_1"]])/16;
-	gsel02 = makeUsInt(v[vars["140_1"]])/16;
-	gsel04 = makeUsInt(v[vars["141_1"]])/16;
-	gsel08 = makeUsInt(v[vars["142_1"]])/16;
-	gsel16 = makeUsInt(v[vars["143_1"]])/16;
-    
-
-	//Cuts 150-165 //1perCAPID;
-	Slope_R0S0_CID0 = makeUsInt(v[vars["150_1"]])/100.;
-	Slope_R0S1_CID0 = makeUsInt(v[vars["151_1"]])/100.;
-	Slope_R0S2_CID0 = makeUsInt(v[vars["152_1"]])/100.;
-	Slope_R0S3_CID0 = makeUsInt(v[vars["153_1"]])/100.;
-	Slope_R1S0_CID0 = makeUsInt(v[vars["154_1"]])/100.;
-	Slope_R1S1_CID0 = makeUsInt(v[vars["155_1"]])/100.;
-	Slope_R1S2_CID0 = makeUsInt(v[vars["156_1"]])/100.;
-	Slope_R1S3_CID0 = makeUsInt(v[vars["157_1"]])/100.;
-	Slope_R2S0_CID0 = makeUsInt(v[vars["158_1"]])/10.;
-	Slope_R2S1_CID0 = makeUsInt(v[vars["159_1"]])/10.;
-	Slope_R2S2_CID0 = makeUsInt(v[vars["160_1"]])/10.;
-	Slope_R2S3_CID0 = makeUsInt(v[vars["161_1"]])/10.;
-	Slope_R3S0_CID0 = makeUsInt(v[vars["162_1"]])/10.;
-	Slope_R3S1_CID0 = makeUsInt(v[vars["163_1"]])/10.;
-	Slope_R3S2_CID0 = makeUsInt(v[vars["164_1"]]);
-	Slope_R3S3_CID0 = makeUsInt(v[vars["165_1"]]);
-
-	Slope_R0S0_CID1 = makeUsInt(v[vars["150_2"]])/100.;
-	Slope_R0S1_CID1 = makeUsInt(v[vars["151_2"]])/100.;
-	Slope_R0S2_CID1 = makeUsInt(v[vars["152_2"]])/100.;
-	Slope_R0S3_CID1 = makeUsInt(v[vars["153_2"]])/100.;
-	Slope_R1S0_CID1 = makeUsInt(v[vars["154_2"]])/100.;
-	Slope_R1S1_CID1 = makeUsInt(v[vars["155_2"]])/100.;
-	Slope_R1S2_CID1 = makeUsInt(v[vars["156_2"]])/100.;
-	Slope_R1S3_CID1 = makeUsInt(v[vars["157_2"]])/100.;
-	Slope_R2S0_CID1 = makeUsInt(v[vars["158_2"]])/10.;
-	Slope_R2S1_CID1 = makeUsInt(v[vars["159_2"]])/10.;
-	Slope_R2S2_CID1 = makeUsInt(v[vars["160_2"]])/10.;
-	Slope_R2S3_CID1 = makeUsInt(v[vars["161_2"]])/10.;
-	Slope_R3S0_CID1 = makeUsInt(v[vars["162_2"]])/10.;
-	Slope_R3S1_CID1 = makeUsInt(v[vars["163_2"]])/10.;
-	Slope_R3S2_CID1 = makeUsInt(v[vars["164_2"]]);
-	Slope_R3S3_CID1 = makeUsInt(v[vars["165_2"]]);
-
-	Slope_R0S0_CID2 = makeUsInt(v[vars["150_3"]])/100.;
-	Slope_R0S1_CID2 = makeUsInt(v[vars["151_3"]])/100.;
-	Slope_R0S2_CID2 = makeUsInt(v[vars["152_3"]])/100.;
-	Slope_R0S3_CID2 = makeUsInt(v[vars["153_3"]])/100.;
-	Slope_R1S0_CID2 = makeUsInt(v[vars["154_3"]])/100.;
-	Slope_R1S1_CID2 = makeUsInt(v[vars["155_3"]])/100.;
-	Slope_R1S2_CID2 = makeUsInt(v[vars["156_3"]])/100.;
-	Slope_R1S3_CID2 = makeUsInt(v[vars["157_3"]])/100.;
-	Slope_R2S0_CID2 = makeUsInt(v[vars["158_3"]])/10.;
-	Slope_R2S1_CID2 = makeUsInt(v[vars["159_3"]])/10.;
-	Slope_R2S2_CID2 = makeUsInt(v[vars["160_3"]])/10.;
-	Slope_R2S3_CID2 = makeUsInt(v[vars["161_3"]])/10.;
-	Slope_R3S0_CID2 = makeUsInt(v[vars["162_3"]])/10.;
-	Slope_R3S1_CID2 = makeUsInt(v[vars["163_3"]])/10.;
-	Slope_R3S2_CID2 = makeUsInt(v[vars["164_3"]]);
-	Slope_R3S3_CID2 = makeUsInt(v[vars["165_3"]]);
-
-	Slope_R0S0_CID3 = makeUsInt(v[vars["150_4"]])/100.;
-	Slope_R0S1_CID3 = makeUsInt(v[vars["151_4"]])/100.;
-	Slope_R0S2_CID3 = makeUsInt(v[vars["152_4"]])/100.;
-	Slope_R0S3_CID3 = makeUsInt(v[vars["153_4"]])/100.;
-	Slope_R1S0_CID3 = makeUsInt(v[vars["154_4"]])/100.;
-	Slope_R1S1_CID3 = makeUsInt(v[vars["155_4"]])/100.;
-	Slope_R1S2_CID3 = makeUsInt(v[vars["156_4"]])/100.;
-	Slope_R1S3_CID3 = makeUsInt(v[vars["157_4"]])/100.;
-	Slope_R2S0_CID3 = makeUsInt(v[vars["158_4"]])/10.;
-	Slope_R2S1_CID3 = makeUsInt(v[vars["159_4"]])/10.;
-	Slope_R2S2_CID3 = makeUsInt(v[vars["160_4"]])/10.;
-	Slope_R2S3_CID3 = makeUsInt(v[vars["161_4"]])/10.;
-	Slope_R3S0_CID3 = makeUsInt(v[vars["162_4"]])/10.;
-	Slope_R3S1_CID3 = makeUsInt(v[vars["163_4"]])/10.;
-	Slope_R3S2_CID3 = makeUsInt(v[vars["164_4"]]);
-	Slope_R3S3_CID3 = makeUsInt(v[vars["165_4"]]);
-
-
-	//Cuts 166-181; //1 perCAPID
-	Int_R0S0_CID0 = makeUsInt(v[vars["166_1"]])/100.;
-	Int_R0S1_CID0 = makeUsInt(v[vars["167_1"]])/100.;
-	Int_R0S2_CID0 = makeUsInt(v[vars["168_1"]])/10.;
-	Int_R0S3_CID0 = makeUsInt(v[vars["169_1"]])/10.;
-	Int_R1S0_CID0 = makeUsInt(v[vars["170_1"]])/10.;
-	Int_R1S1_CID0 = makeUsInt(v[vars["171_1"]])/10.;
-	Int_R1S2_CID0 = makeUsInt(v[vars["172_1"]]);
-	Int_R1S3_CID0 = makeUsInt(v[vars["173_1"]]);
-	Int_R2S0_CID0 = makeUsInt(v[vars["174_1"]]);
-	Int_R2S1_CID0 = makeUsInt(v[vars["175_1"]]);
-	Int_R2S2_CID0 = makeUsInt(v[vars["176_1"]]);
-	Int_R2S3_CID0 = makeUsInt(v[vars["177_1"]])/2.;
-	Int_R3S0_CID0 = makeUsInt(v[vars["178_1"]])/2.;
-	Int_R3S1_CID0 = makeUsInt(v[vars["179_1"]]);
-	Int_R3S2_CID0 = makeUsInt(v[vars["180_1"]])/4.;
-	Int_R3S3_CID0 = makeUsInt(v[vars["181_1"]])/16.;
-
-	Int_R0S0_CID1 = makeUsInt(v[vars["166_2"]])/100.;
-	Int_R0S1_CID1 = makeUsInt(v[vars["167_2"]])/100.;
-	Int_R0S2_CID1 = makeUsInt(v[vars["168_2"]])/10.;
-	Int_R0S3_CID1 = makeUsInt(v[vars["169_2"]])/10.;
-	Int_R1S0_CID1 = makeUsInt(v[vars["170_2"]])/10.;
-	Int_R1S1_CID1 = makeUsInt(v[vars["171_2"]])/10.;
-	Int_R1S2_CID1 = makeUsInt(v[vars["172_2"]]);
-	Int_R1S3_CID1 = makeUsInt(v[vars["173_2"]]);
-	Int_R2S0_CID1 = makeUsInt(v[vars["174_2"]]);
-	Int_R2S1_CID1 = makeUsInt(v[vars["175_2"]]);
-	Int_R2S2_CID1 = makeUsInt(v[vars["176_2"]]);
-	Int_R2S3_CID1 = makeUsInt(v[vars["177_2"]])/2.;
-	Int_R3S0_CID1 = makeUsInt(v[vars["178_2"]])/2.;
-	Int_R3S1_CID1 = makeUsInt(v[vars["179_2"]]);
-	Int_R3S2_CID1 = makeUsInt(v[vars["180_2"]])/4.;
-	Int_R3S3_CID1 = makeUsInt(v[vars["181_2"]])/16.;
-
-	Int_R0S0_CID2 = makeUsInt(v[vars["166_3"]])/100.;
-	Int_R0S1_CID2 = makeUsInt(v[vars["167_3"]])/100.;
-	Int_R0S2_CID2 = makeUsInt(v[vars["168_3"]])/10.;
-	Int_R0S3_CID2 = makeUsInt(v[vars["169_3"]])/10.;
-	Int_R1S0_CID2 = makeUsInt(v[vars["170_3"]])/10.;
-	Int_R1S1_CID2 = makeUsInt(v[vars["171_3"]])/10.;
-	Int_R1S2_CID2 = makeUsInt(v[vars["172_3"]]);
-	Int_R1S3_CID2 = makeUsInt(v[vars["173_3"]]);
-	Int_R2S0_CID2 = makeUsInt(v[vars["174_3"]]);
-	Int_R2S1_CID2 = makeUsInt(v[vars["175_3"]]);
-	Int_R2S2_CID2 = makeUsInt(v[vars["176_3"]]);
-	Int_R2S3_CID2 = makeUsInt(v[vars["177_3"]])/2.;
-	Int_R3S0_CID2 = makeUsInt(v[vars["178_3"]])/2.;
-	Int_R3S1_CID2 = makeUsInt(v[vars["179_3"]]);
-	Int_R3S2_CID2 = makeUsInt(v[vars["180_3"]])/4.;
-	Int_R3S3_CID2 = makeUsInt(v[vars["181_3"]])/16.;
-
-	Int_R0S0_CID3 = makeUsInt(v[vars["166_4"]])/100.;
-	Int_R0S1_CID3 = makeUsInt(v[vars["167_4"]])/100.;
-	Int_R0S2_CID3 = makeUsInt(v[vars["168_4"]])/10.;
-	Int_R0S3_CID3 = makeUsInt(v[vars["169_4"]])/10.;
-	Int_R1S0_CID3 = makeUsInt(v[vars["170_4"]])/10.;
-	Int_R1S1_CID3 = makeUsInt(v[vars["171_4"]])/10.;
-	Int_R1S2_CID3 = makeUsInt(v[vars["172_4"]]);
-	Int_R1S3_CID3 = makeUsInt(v[vars["173_4"]]);
-	Int_R2S0_CID3 = makeUsInt(v[vars["174_4"]]);
-	Int_R2S1_CID3 = makeUsInt(v[vars["175_4"]]);
-	Int_R2S2_CID3 = makeUsInt(v[vars["176_4"]]);
-	Int_R2S3_CID3 = makeUsInt(v[vars["177_4"]])/2.;
-	Int_R3S0_CID3 = makeUsInt(v[vars["178_4"]])/2.;
-	Int_R3S1_CID3 = makeUsInt(v[vars["179_4"]]);
-	Int_R3S2_CID3 = makeUsInt(v[vars["180_4"]])/4.;
-	Int_R3S3_CID3 = makeUsInt(v[vars["181_4"]])/16.;
-    
-	//Cut 182 - ARRAY - 496 entries!!!
-	for(int i=0; i<255; i++) {
-      
-	    if(vars["182_1"] != 0) {
-		if(i<62) ADCDNL[i] = makeUsInt(v[vars["182_1"]+i])/1000. - 1;
-	    }
- 
-	    //if(i<255) {
- 
-	    if(vars["191_1"] != 0) TDCVertOffset[i] = makeUsInt(v[vars["191_1"]+i])/100. - 10;     
-	    if(vars["193_1"] != 0) Sum4DNL[i] = makeUsInt(v[vars["193_1"]+i])/1000. - 1;
-      
-	    //}
+	    WRPmax = makeUsInt(v[vars["106_1"]])/10000.;
+	    WRPRange01 = makeUsInt(v[vars["107_1"]])/10000.;
+	    WRPRange12 = makeUsInt(v[vars["108_1"]])/10000.;
+	    WRPRange23 = makeUsInt(v[vars["109_1"]])/10000.;
 	}
-    
-	//Cuts 183-185
-	OverlapR01_CID0 = makeUsInt(v[vars["183_1"]])/100.;
-	OverlapR12_CID0 = makeUsInt(v[vars["184_1"]])/100.;
-	OverlapR23_CID0 = makeUsInt(v[vars["185_1"]])/100.;
 
-	OverlapR01_CID1 = makeUsInt(v[vars["183_2"]])/100.;
-	OverlapR12_CID1 = makeUsInt(v[vars["184_2"]])/100.;
-	OverlapR23_CID1 = makeUsInt(v[vars["185_2"]])/100.;
+	if(vars.find("110_1") != vars.end())
+	{
+	    //Cuts 110-137
+	    lADC00_Dat0      = getVoltOBD(makeSInt(v[vars["110_1"]]));
+	    lADC01_Dat3      = getVoltOBD(makeSInt(v[vars["111_1"]]));
+	    lADC02_Dat6      = getVoltOBD(makeSInt(v[vars["112_1"]]));
+	    lADC03_Disc      = getVoltOBD(makeSInt(v[vars["113_1"]]));
+	    lADC10_Dat0Bar   = getVoltOBD(makeSInt(v[vars["114_1"]]));
+	    lADC11_Dat3Bar   = getVoltOBD(makeSInt(v[vars["115_1"]]));
+	    lADC12_Dat6Bar   = getVoltOBD(makeSInt(v[vars["116_1"]]));
+	    lADC13_DiscBar   = getVoltOBD(makeSInt(v[vars["117_1"]]));
+	    lADC20_Dat1      = getVoltOBD(makeSInt(v[vars["118_1"]]));
+	    lADC21_Dat4      = getVoltOBD(makeSInt(v[vars["119_1"]]));
+	    lADC22_Dat7      = getVoltOBD(makeSInt(v[vars["120_1"]]));
+	    lADC23_Rref      = getVoltOBD(makeSInt(v[vars["121_1"]]));
+	    lADC30_Dat1Bar   = getVoltOBD(makeSInt(v[vars["122_1"]]));
+	    lADC31_Dat4Bar   = getVoltOBD(makeSInt(v[vars["123_1"]]));
+	    lADC32_Dat7Bar   = getVoltOBD(makeSInt(v[vars["124_1"]]));
+	    lADC33_IDCset    = getVoltOBD(makeSInt(v[vars["125_1"]]));
+	    lADC40_Dat2      = getVoltOBD(makeSInt(v[vars["126_1"]]));
+	    lADC41_Dat5      = getVoltOBD(makeSInt(v[vars["127_1"]]));
+	    lADC42_ClkOut    = getVoltOBD(makeSInt(v[vars["128_1"]]));
+	    lADC43_InSig     = getVoltOBD(makeSInt(v[vars["129_1"]]));
+	    lADC50_Dat2Bar   = getVoltOBD(makeSInt(v[vars["130_1"]]));
+	    lADC51_Dat5Bar   = getVoltOBD(makeSInt(v[vars["131_1"]]));
+	    lADC52_ClkOutBar = getVoltOBD(makeSInt(v[vars["132_1"]]));
+	    lADC53_InRef     = getVoltOBD(makeSInt(v[vars["133_1"]]));
+	    lADC60_IsetP     = getVoltOBD(makeSInt(v[vars["134_1"]]));
+	    lADC61_33V       = getVoltOBD(makeSInt(v[vars["135_1"]]));
+	    lADC62_50V       = getVoltOBD(makeSInt(v[vars["136_1"]]));
+	    lADC63_Clamp     = getVoltOBD(makeSInt(v[vars["137_1"]]));
+	    
+	    gsel00 = makeUsInt(v[vars["138_1"]])/16;
+	    gsel01 = makeUsInt(v[vars["139_1"]])/16;
+	    gsel02 = makeUsInt(v[vars["140_1"]])/16;
+	    gsel04 = makeUsInt(v[vars["141_1"]])/16;
+	    gsel08 = makeUsInt(v[vars["142_1"]])/16;
+	    gsel16 = makeUsInt(v[vars["143_1"]])/16;
+	}
 
-	OverlapR01_CID2 = makeUsInt(v[vars["183_3"]])/100.;
-	OverlapR12_CID2 = makeUsInt(v[vars["184_3"]])/100.;
-	OverlapR23_CID2 = makeUsInt(v[vars["185_3"]])/100.;
+	if(vars.find("150_1") != vars.end())
+	{
+	    //Cuts 150-165 //1perCAPID;
+	    Slope_R0S0_CID0 = makeUsInt(v[vars["150_1"]])/100.;
+	    Slope_R0S1_CID0 = makeUsInt(v[vars["151_1"]])/100.;
+	    Slope_R0S2_CID0 = makeUsInt(v[vars["152_1"]])/100.;
+	    Slope_R0S3_CID0 = makeUsInt(v[vars["153_1"]])/100.;
+	    Slope_R1S0_CID0 = makeUsInt(v[vars["154_1"]])/100.;
+	    Slope_R1S1_CID0 = makeUsInt(v[vars["155_1"]])/100.;
+	    Slope_R1S2_CID0 = makeUsInt(v[vars["156_1"]])/100.;
+	    Slope_R1S3_CID0 = makeUsInt(v[vars["157_1"]])/100.;
+	    Slope_R2S0_CID0 = makeUsInt(v[vars["158_1"]])/10.;
+	    Slope_R2S1_CID0 = makeUsInt(v[vars["159_1"]])/10.;
+	    Slope_R2S2_CID0 = makeUsInt(v[vars["160_1"]])/10.;
+	    Slope_R2S3_CID0 = makeUsInt(v[vars["161_1"]])/10.;
+	    Slope_R3S0_CID0 = makeUsInt(v[vars["162_1"]])/10.;
+	    Slope_R3S1_CID0 = makeUsInt(v[vars["163_1"]])/10.;
+	    Slope_R3S2_CID0 = makeUsInt(v[vars["164_1"]]);
+	    Slope_R3S3_CID0 = makeUsInt(v[vars["165_1"]]);
 
-	OverlapR01_CID3 = makeUsInt(v[vars["183_4"]])/100.;
-	OverlapR12_CID3 = makeUsInt(v[vars["184_4"]])/100.;
-	OverlapR23_CID3 = makeUsInt(v[vars["185_4"]])/100.;
+	    Slope_R0S0_CID1 = makeUsInt(v[vars["150_2"]])/100.;
+	    Slope_R0S1_CID1 = makeUsInt(v[vars["151_2"]])/100.;
+	    Slope_R0S2_CID1 = makeUsInt(v[vars["152_2"]])/100.;
+	    Slope_R0S3_CID1 = makeUsInt(v[vars["153_2"]])/100.;
+	    Slope_R1S0_CID1 = makeUsInt(v[vars["154_2"]])/100.;
+	    Slope_R1S1_CID1 = makeUsInt(v[vars["155_2"]])/100.;
+	    Slope_R1S2_CID1 = makeUsInt(v[vars["156_2"]])/100.;
+	    Slope_R1S3_CID1 = makeUsInt(v[vars["157_2"]])/100.;
+	    Slope_R2S0_CID1 = makeUsInt(v[vars["158_2"]])/10.;
+	    Slope_R2S1_CID1 = makeUsInt(v[vars["159_2"]])/10.;
+	    Slope_R2S2_CID1 = makeUsInt(v[vars["160_2"]])/10.;
+	    Slope_R2S3_CID1 = makeUsInt(v[vars["161_2"]])/10.;
+	    Slope_R3S0_CID1 = makeUsInt(v[vars["162_2"]])/10.;
+	    Slope_R3S1_CID1 = makeUsInt(v[vars["163_2"]])/10.;
+	    Slope_R3S2_CID1 = makeUsInt(v[vars["164_2"]]);
+	    Slope_R3S3_CID1 = makeUsInt(v[vars["165_2"]]);
+
+	    Slope_R0S0_CID2 = makeUsInt(v[vars["150_3"]])/100.;
+	    Slope_R0S1_CID2 = makeUsInt(v[vars["151_3"]])/100.;
+	    Slope_R0S2_CID2 = makeUsInt(v[vars["152_3"]])/100.;
+	    Slope_R0S3_CID2 = makeUsInt(v[vars["153_3"]])/100.;
+	    Slope_R1S0_CID2 = makeUsInt(v[vars["154_3"]])/100.;
+	    Slope_R1S1_CID2 = makeUsInt(v[vars["155_3"]])/100.;
+	    Slope_R1S2_CID2 = makeUsInt(v[vars["156_3"]])/100.;
+	    Slope_R1S3_CID2 = makeUsInt(v[vars["157_3"]])/100.;
+	    Slope_R2S0_CID2 = makeUsInt(v[vars["158_3"]])/10.;
+	    Slope_R2S1_CID2 = makeUsInt(v[vars["159_3"]])/10.;
+	    Slope_R2S2_CID2 = makeUsInt(v[vars["160_3"]])/10.;
+	    Slope_R2S3_CID2 = makeUsInt(v[vars["161_3"]])/10.;
+	    Slope_R3S0_CID2 = makeUsInt(v[vars["162_3"]])/10.;
+	    Slope_R3S1_CID2 = makeUsInt(v[vars["163_3"]])/10.;
+	    Slope_R3S2_CID2 = makeUsInt(v[vars["164_3"]]);
+	    Slope_R3S3_CID2 = makeUsInt(v[vars["165_3"]]);
+
+	    Slope_R0S0_CID3 = makeUsInt(v[vars["150_4"]])/100.;
+	    Slope_R0S1_CID3 = makeUsInt(v[vars["151_4"]])/100.;
+	    Slope_R0S2_CID3 = makeUsInt(v[vars["152_4"]])/100.;
+	    Slope_R0S3_CID3 = makeUsInt(v[vars["153_4"]])/100.;
+	    Slope_R1S0_CID3 = makeUsInt(v[vars["154_4"]])/100.;
+	    Slope_R1S1_CID3 = makeUsInt(v[vars["155_4"]])/100.;
+	    Slope_R1S2_CID3 = makeUsInt(v[vars["156_4"]])/100.;
+	    Slope_R1S3_CID3 = makeUsInt(v[vars["157_4"]])/100.;
+	    Slope_R2S0_CID3 = makeUsInt(v[vars["158_4"]])/10.;
+	    Slope_R2S1_CID3 = makeUsInt(v[vars["159_4"]])/10.;
+	    Slope_R2S2_CID3 = makeUsInt(v[vars["160_4"]])/10.;
+	    Slope_R2S3_CID3 = makeUsInt(v[vars["161_4"]])/10.;
+	    Slope_R3S0_CID3 = makeUsInt(v[vars["162_4"]])/10.;
+	    Slope_R3S1_CID3 = makeUsInt(v[vars["163_4"]])/10.;
+	    Slope_R3S2_CID3 = makeUsInt(v[vars["164_4"]]);
+	    Slope_R3S3_CID3 = makeUsInt(v[vars["165_4"]]);
 
 
-	//Cuts 186-189
-	Pedestal_CID0 = makeUsInt(v[vars["186_1"]])/1000.; 
-	Pedestal_CID1 = makeUsInt(v[vars["186_2"]])/1000.;
-	Pedestal_CID2 = makeUsInt(v[vars["186_3"]])/1000.;
-	Pedestal_CID3 = makeUsInt(v[vars["186_4"]])/1000.;
-    
-	PedestalRMS_CID0 = makeUsInt(v[vars["189_1"]])/1000.;
-	PedestalRMS_CID1 = makeUsInt(v[vars["189_2"]])/1000.;
-	PedestalRMS_CID2 = makeUsInt(v[vars["189_3"]])/1000.;
-	PedestalRMS_CID3 = makeUsInt(v[vars["189_4"]])/1000.;
-    
-	PedestalDACSlope_Lo = makeUsInt(v[vars["187_1"]])/1000.; //2 of these
-	PedestalDACSlope_Hi = makeUsInt(v[vars["187_2"]])/1000.;
-    
-	CapIDPedDACSlope_CID0 = makeUsInt(v[vars["188_1"]])/1000.;
-	CapIDPedDACSlope_CID1 = makeUsInt(v[vars["188_2"]])/1000.;
-	CapIDPedDACSlope_CID2 = makeUsInt(v[vars["188_3"]])/1000.;
-	CapIDPedDACSlope_CID3 = makeUsInt(v[vars["188_4"]])/1000.;
-    
+	    //Cuts 166-181; //1 perCAPID
+	    Int_R0S0_CID0 = makeUsInt(v[vars["166_1"]])/100.;
+	    Int_R0S1_CID0 = makeUsInt(v[vars["167_1"]])/100.;
+	    Int_R0S2_CID0 = makeUsInt(v[vars["168_1"]])/10.;
+	    Int_R0S3_CID0 = makeUsInt(v[vars["169_1"]])/10.;
+	    Int_R1S0_CID0 = makeUsInt(v[vars["170_1"]])/10.;
+	    Int_R1S1_CID0 = makeUsInt(v[vars["171_1"]])/10.;
+	    Int_R1S2_CID0 = makeUsInt(v[vars["172_1"]]);
+	    Int_R1S3_CID0 = makeUsInt(v[vars["173_1"]]);
+	    Int_R2S0_CID0 = makeUsInt(v[vars["174_1"]]);
+	    Int_R2S1_CID0 = makeUsInt(v[vars["175_1"]]);
+	    Int_R2S2_CID0 = makeUsInt(v[vars["176_1"]]);
+	    Int_R2S3_CID0 = makeUsInt(v[vars["177_1"]])/2.;
+	    Int_R3S0_CID0 = makeUsInt(v[vars["178_1"]])/2.;
+	    Int_R3S1_CID0 = makeUsInt(v[vars["179_1"]]);
+	    Int_R3S2_CID0 = makeUsInt(v[vars["180_1"]])/4.;
+	    Int_R3S3_CID0 = makeUsInt(v[vars["181_1"]])/16.;
+
+	    Int_R0S0_CID1 = makeUsInt(v[vars["166_2"]])/100.;
+	    Int_R0S1_CID1 = makeUsInt(v[vars["167_2"]])/100.;
+	    Int_R0S2_CID1 = makeUsInt(v[vars["168_2"]])/10.;
+	    Int_R0S3_CID1 = makeUsInt(v[vars["169_2"]])/10.;
+	    Int_R1S0_CID1 = makeUsInt(v[vars["170_2"]])/10.;
+	    Int_R1S1_CID1 = makeUsInt(v[vars["171_2"]])/10.;
+	    Int_R1S2_CID1 = makeUsInt(v[vars["172_2"]]);
+	    Int_R1S3_CID1 = makeUsInt(v[vars["173_2"]]);
+	    Int_R2S0_CID1 = makeUsInt(v[vars["174_2"]]);
+	    Int_R2S1_CID1 = makeUsInt(v[vars["175_2"]]);
+	    Int_R2S2_CID1 = makeUsInt(v[vars["176_2"]]);
+	    Int_R2S3_CID1 = makeUsInt(v[vars["177_2"]])/2.;
+	    Int_R3S0_CID1 = makeUsInt(v[vars["178_2"]])/2.;
+	    Int_R3S1_CID1 = makeUsInt(v[vars["179_2"]]);
+	    Int_R3S2_CID1 = makeUsInt(v[vars["180_2"]])/4.;
+	    Int_R3S3_CID1 = makeUsInt(v[vars["181_2"]])/16.;
+
+	    Int_R0S0_CID2 = makeUsInt(v[vars["166_3"]])/100.;
+	    Int_R0S1_CID2 = makeUsInt(v[vars["167_3"]])/100.;
+	    Int_R0S2_CID2 = makeUsInt(v[vars["168_3"]])/10.;
+	    Int_R0S3_CID2 = makeUsInt(v[vars["169_3"]])/10.;
+	    Int_R1S0_CID2 = makeUsInt(v[vars["170_3"]])/10.;
+	    Int_R1S1_CID2 = makeUsInt(v[vars["171_3"]])/10.;
+	    Int_R1S2_CID2 = makeUsInt(v[vars["172_3"]]);
+	    Int_R1S3_CID2 = makeUsInt(v[vars["173_3"]]);
+	    Int_R2S0_CID2 = makeUsInt(v[vars["174_3"]]);
+	    Int_R2S1_CID2 = makeUsInt(v[vars["175_3"]]);
+	    Int_R2S2_CID2 = makeUsInt(v[vars["176_3"]]);
+	    Int_R2S3_CID2 = makeUsInt(v[vars["177_3"]])/2.;
+	    Int_R3S0_CID2 = makeUsInt(v[vars["178_3"]])/2.;
+	    Int_R3S1_CID2 = makeUsInt(v[vars["179_3"]]);
+	    Int_R3S2_CID2 = makeUsInt(v[vars["180_3"]])/4.;
+	    Int_R3S3_CID2 = makeUsInt(v[vars["181_3"]])/16.;
+
+	    Int_R0S0_CID3 = makeUsInt(v[vars["166_4"]])/100.;
+	    Int_R0S1_CID3 = makeUsInt(v[vars["167_4"]])/100.;
+	    Int_R0S2_CID3 = makeUsInt(v[vars["168_4"]])/10.;
+	    Int_R0S3_CID3 = makeUsInt(v[vars["169_4"]])/10.;
+	    Int_R1S0_CID3 = makeUsInt(v[vars["170_4"]])/10.;
+	    Int_R1S1_CID3 = makeUsInt(v[vars["171_4"]])/10.;
+	    Int_R1S2_CID3 = makeUsInt(v[vars["172_4"]]);
+	    Int_R1S3_CID3 = makeUsInt(v[vars["173_4"]]);
+	    Int_R2S0_CID3 = makeUsInt(v[vars["174_4"]]);
+	    Int_R2S1_CID3 = makeUsInt(v[vars["175_4"]]);
+	    Int_R2S2_CID3 = makeUsInt(v[vars["176_4"]]);
+	    Int_R2S3_CID3 = makeUsInt(v[vars["177_4"]])/2.;
+	    Int_R3S0_CID3 = makeUsInt(v[vars["178_4"]])/2.;
+	    Int_R3S1_CID3 = makeUsInt(v[vars["179_4"]]);
+	    Int_R3S2_CID3 = makeUsInt(v[vars["180_4"]])/4.;
+	    Int_R3S3_CID3 = makeUsInt(v[vars["181_4"]])/16.;
+	}
+
+	if(vars.find("182_1") != vars.end())
+	{
+	    //Cut 182 - ARRAY - 496 entries!!!
+	    for(int i=0; i<255; i++) {
+      
+		if(vars["182_1"] != 0) {
+		    if(i<62) ADCDNL[i] = makeUsInt(v[vars["182_1"]+i])/1000. - 1;
+		}
+		
+		//if(i<255) {
+ 
+		if(vars["191_1"] != 0) TDCVertOffset[i] = makeUsInt(v[vars["191_1"]+i])/100. - 10;     
+		if(vars["193_1"] != 0) Sum4DNL[i] = makeUsInt(v[vars["193_1"]+i])/1000. - 1;
+		
+		//}
+	    }
+	}
+
+	if(vars.find("183_1") != vars.end())
+	{
+	    //Cuts 183-185
+	    OverlapR01_CID0 = makeUsInt(v[vars["183_1"]])/100.;
+	    OverlapR12_CID0 = makeUsInt(v[vars["184_1"]])/100.;
+	    OverlapR23_CID0 = makeUsInt(v[vars["185_1"]])/100.;
+	    
+	    OverlapR01_CID1 = makeUsInt(v[vars["183_2"]])/100.;
+	    OverlapR12_CID1 = makeUsInt(v[vars["184_2"]])/100.;
+	    OverlapR23_CID1 = makeUsInt(v[vars["185_2"]])/100.;
+	    
+	    OverlapR01_CID2 = makeUsInt(v[vars["183_3"]])/100.;
+	    OverlapR12_CID2 = makeUsInt(v[vars["184_3"]])/100.;
+	    OverlapR23_CID2 = makeUsInt(v[vars["185_3"]])/100.;
+	    
+	    OverlapR01_CID3 = makeUsInt(v[vars["183_4"]])/100.;
+	    OverlapR12_CID3 = makeUsInt(v[vars["184_4"]])/100.;
+	    OverlapR23_CID3 = makeUsInt(v[vars["185_4"]])/100.;
+	    
+	    
+	    //Cuts 186-189
+	    Pedestal_CID0 = makeUsInt(v[vars["186_1"]])/1000.; 
+	    Pedestal_CID1 = makeUsInt(v[vars["186_2"]])/1000.;
+	    Pedestal_CID2 = makeUsInt(v[vars["186_3"]])/1000.;
+	    Pedestal_CID3 = makeUsInt(v[vars["186_4"]])/1000.;
+	    
+	    PedestalRMS_CID0 = makeUsInt(v[vars["189_1"]])/1000.;
+	    PedestalRMS_CID1 = makeUsInt(v[vars["189_2"]])/1000.;
+	    PedestalRMS_CID2 = makeUsInt(v[vars["189_3"]])/1000.;
+	    PedestalRMS_CID3 = makeUsInt(v[vars["189_4"]])/1000.;
+	    
+	    PedestalDACSlope_Lo = makeUsInt(v[vars["187_1"]])/1000.; //2 of these
+	    PedestalDACSlope_Hi = makeUsInt(v[vars["187_2"]])/1000.;
+	    
+	    CapIDPedDACSlope_CID0 = makeUsInt(v[vars["188_1"]])/1000.;
+	    CapIDPedDACSlope_CID1 = makeUsInt(v[vars["188_2"]])/1000.;
+	    CapIDPedDACSlope_CID2 = makeUsInt(v[vars["188_3"]])/1000.;
+	    CapIDPedDACSlope_CID3 = makeUsInt(v[vars["188_4"]])/1000.;
+	}
 	//Cuts 190-191
 	TDCBinWidth = makeUsInt(v[vars["190_1"]])/1000.;
     

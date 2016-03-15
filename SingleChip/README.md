@@ -1,7 +1,7 @@
 Instructions to run QIEtest.C: 
 
 ```
-root -l
+root -l -b
 .L QIEtest.C+
 doADCTest(<inputFileName>,<outputPathName>)
 doTDCTest(<inputFileName>,<outputPathName>)

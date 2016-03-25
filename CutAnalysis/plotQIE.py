@@ -1,69 +1,56 @@
-# Plotter for qie dataframes
+##################################
+## Plotter for qie dataframes   ##
+##                              ##
+## Author: Nadja Strobbe        ##
+## Initial version: 2016/03/25  ##
+##################################
 
 from CutInfo11 import cutinfo11
 import os
 import matplotlib.pyplot as plt
 import matplotlib
-#matplotlib.style.use('ggplot')
 
 class PlotQIE:
     def __init__(self, df):
+        # Store the dataframe for easy access
         self.qie = df
+        # Default output directory
         self.outputdir = "./"
         # some basic formatting options
         self.labelsize = 20
         self.ticklabelsize = 16
         self.colorlist = ['mediumpurple','coral','lightseagreen',
-                          'orange','lightslategrey','palevioletred']
+                          'orange','lightslategrey','palevioletred',
+                          'yellowgreen', 'skyblue', 'gold']
 
     def setOutputDir(self, outputdir):
+        """Set the directory where the plot output will go. Create it if it doesn't exist."""
         self.outputdir = outputdir
         if not os.path.isdir(outputdir):
             os.makedirs(outputdir)
 
-    def plotVar(self, var):
-        ax = self.qie[var].hist(bins=20, color='mediumpurple')
-        #ax = self.qie[var].hist(bins=20, stacked=True, color='mediumpurple')
-        mean = self.qie[var].mean()
-        std = self.qie[var].std()
-        varname = var.split("_")
-        if varname[0] in cutinfo11:
-            if len(varname) == 1:
-                plt.xlabel(cutinfo11[varname[0]][0])
-            else:
-                plt.xlabel(cutinfo11[varname[0]][0] + " ; " + varname[1])
-        else:
-            plt.xlabel(varname[0])
-        plt.ylabel("Normalized count")
-        # set margins
-        x0, x1, y0, y1 = plt.axis()
-        plt.axis((x0,
-                  x1,
-                  y0,
-                  y1*(1+0.15)))
-        plt.figtext(0.15,0.82,"Mean: %.3g\nStd: %.3g"%(mean, std))
-        plt.savefig("%s/%s.pdf" % (self.outputdir, var))
-        plt.clf()
-
-    def plotVarGroup(self, var, series, groups):
+    def plotVarGroup(self, var, series, groups=None, labels=None, postfix=""):
+        """Make plot for a given variable, and divide the chips in provided groups."""
         # split the variable name
         varname = var.split("_")
 
-        # create the groups
-        #g1 = [11,12,16]
-        #g2 = [15,20]
-        #g3 = [i for i in self.qie.index.values if ((not i in g1) and (not i in g2))]
-        #df1 = series.loc[g1]
-        #df2 = series.loc[g2]
-        #df3 = series.loc[g3]
-        #dfs = [df1,df2,df3]
+        # create the separate dataframes from the provided groups
+        # Define some labels if we have groups
+        dfs = None
+        if groups:
+            dfs = [series.loc[g] for g in groups]
+            if not labels or len(labels) != len(groups):
+                labels = ["Group %s" % (i+1) for i in xrange(len(groups)-1)]
+                labels.append("Bulk")
+        else:
+            dfs = [series]
 
-        dfs = [series.loc[g] for g in groups]
-        # Get right number of colors, and reverse them so that mediumpurple is used for the bulk of the chips
+
+        # Get right number of colors, and reverse them so that mediumpurple is 
+        # used for the bulk of the chips (assumed to be the last group)
         colors = (self.colorlist[:len(dfs)])
         colors.reverse()
-        labels = ["Group 1", "Group 2", "Bulk"]
-
+        
         # Make the histogram
         # Get the preferred binning and check whether all values fall within that range 
         if varname[0] in cutinfo11:
@@ -85,12 +72,15 @@ class PlotQIE:
         # Set the axis titles
         if varname[0] in cutinfo11:
             if len(varname) == 1:
-                plt.xlabel(cutinfo11[varname[0]][0], fontsize=self.labelsize)
+                plt.xlabel(cutinfo11[varname[0]][0], 
+                           fontsize=self.labelsize)
             else:
-                plt.xlabel(cutinfo11[varname[0]][0] + " ; " + varname[1], fontsize=self.labelsize)
+                plt.xlabel("%s ; %s" % (cutinfo11[varname[0]][0], varname[1]), 
+                           fontsize=self.labelsize)
         else:
-            plt.xlabel(varname[0], fontsize=self.labelsize)
-        plt.ylabel("Normalized count", fontsize=self.labelsize)
+            plt.xlabel(varname[0], 
+                       fontsize=self.labelsize)
+        plt.ylabel("Number of chips", fontsize=self.labelsize)
 
         # set margins and format axis labels
         x0, x1, y0, y1 = plt.axis()
@@ -107,11 +97,12 @@ class PlotQIE:
                     "Mean: %.3g\nStd: %.3g"%(mean, std),
                     fontsize=self.ticklabelsize)
 
-        # Add legend
-        plt.legend(loc='best')
+        # Add legend if we have labels
+        if labels:
+            plt.legend(loc='best')
 
         # Save figure
-        plt.savefig("%s/%s_grouped.pdf" % (self.outputdir, var))
+        plt.savefig("%s/%s%s.pdf" % (self.outputdir, var, postfix))
         plt.clf()
 
     def plotAll(self):
@@ -124,5 +115,5 @@ class PlotQIE:
         self.fig = plt.figure()
         for cname, series in self.qie.iteritems():
             print "Making plot for %s" % (cname)
-            #self.plotVar(cname)
-            self.plotVarGroup(cname,series,[g1,g2,g3])
+            self.plotVarGroup(cname,series,[g1,g2,g3],postfix="_grouped")
+            #self.plotVarGroup(cname,series)

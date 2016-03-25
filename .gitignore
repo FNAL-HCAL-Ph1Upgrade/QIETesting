@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+# Compiled python
+*.pyc
+
+# Temporary file
+*~
+*.d
+*.pcm

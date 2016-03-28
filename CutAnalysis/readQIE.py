@@ -64,14 +64,18 @@ class QIEDataframe:
         df.set_index("i", inplace=True)
         return df
 
-    def readCutsMakerFile(inputfile):
+    def readCutsMakerFile(self, inputfile):
         """Read csv file from cutsmaker and convert to dataframe."""
+        header = ""
         with open(inputfile) as f:
             l1 = f.readline()
             l2 = f.readline()
             header = "Status,%s" % (l2)
+            header = header.replace("Cuts","ChipID")
         df = pd.read_csv(inputfile, skiprows=2, header=None, names=header.split(","))
         df.index.name = "i"
+        df.drop("Status", axis=1, inplace=True)
+        df["ChipID"] = df["ChipID"].apply(lambda x: int(x.split()[-1]))
         return df
 
     def processDataframe(self):
@@ -85,7 +89,6 @@ class QIEDataframe:
         
         # Loop through the dataframe and convert values
         for cname, series in self.df.iteritems():
-            print "column,", cname
             cname_base = cname.split("_")[0]
             if cname_base in cutinfo11:
                 seq = cutinfo11[cname_base][1]
@@ -97,10 +100,14 @@ class DataConversion:
         pass
 
     def convertHexToInt(self,val):
-        return int(val,16)
+        # Checking for int doesn't work since it can also be a numpy.int64, etc
+        if type(val) is not str:
+            return val
+        else:
+            return int(val,16)
 
     def convertHexToIntSigned(self,val):
-        val_int = int(val,16)
+        val_int = val if type(val) is not str else int(val,16)
         if val_int < 32768:
             return val_int
         else:

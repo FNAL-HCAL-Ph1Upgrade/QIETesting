@@ -56,12 +56,14 @@ python processQIEInfo.py QIE11.output.txt --fromCutsMaker --out pkl --plot --plo
 1. Get the cuts_all file and load it into Al's CutsMaker
 2. Get the output tuple (comma-separated txt file)
 3. Make a ROOT TTree out of this file:
-```
-root -l
-.L makeQIEtree.C+
-MakeTupleFromCutsMaker("QIE11.output.txt", "treefile.root")
-```
+
+    ```
+    root -l
+    .L makeQIEtree.C+
+    MakeTupleFromCutsMaker("QIE11.output.txt", "treefile.root")
+    ```
 4. Make plots to find cuts -- plotter still to be moved from Daryl's area
 5. Create a cuts file
-   5.1 Use Al's CutsMaker to make the cuts file
-   5.2 Load cuts file into Al's CutsMaker so that it can be communicated to the robot
+
+     1. Use Al's CutsMaker to make the cuts file
+     2. Load cuts file into Al's CutsMaker so that it can be communicated to the robot

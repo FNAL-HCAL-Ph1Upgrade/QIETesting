@@ -43,7 +43,7 @@ if __name__ == "__main__":
         qiedf = pd.read_pickle(args.inputfile)
     else:
         print "Create dataframe from %s" % (args.inputfile)
-        qie = QIEDataframe(args.inputfile, args.fromCutsMaker)
+        qie = readQIE.QIEDataframe(args.inputfile, args.fromCutsMaker)
         print "Processing dataframe..."
         qie.processDataframe()
         qiedf = qie.df

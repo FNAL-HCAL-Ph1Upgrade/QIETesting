@@ -1,14 +1,24 @@
-import argparse
+##################################
+## Create dataframe to hold     ##
+## QIE information.             ##
+##                              ##
+## Author: Nadja Strobbe        ##
+## Initial version: 2016/03/25  ##
+##################################
+
 import pandas as pd
 from collections import defaultdict
 from CutInfo11 import cutinfo11
-import plotQIE
 
 class QIEDataframe:
-    def __init__(self,inputfile):
+    def __init__(self,inputfile,fromCutsMaker=False):
         self.input = inputfile
-        self.dict = self.createDictionary(inputfile)
-        self.df = self.createDataframe()
+        if not fromCutsMaker:
+            self.dict = self.createDictionary(inputfile)
+            self.df = self.createDataframe()
+        else:
+            self.dict = None
+            self.df = self.readCutsMakerFile(inputfile)
 
     def createDictionary(self,inputfile):
         """Create dataframe from the cuts_all file"""
@@ -20,29 +30,23 @@ class QIEDataframe:
                 if "Chip Number" in line:
                     # write what was there
                     if temp_dict != None:
-                        temp_dict["i"] = entries
                         info.append(self.processDictionary(temp_dict))
                     # Prep for next
-                    entries+=1
                     temp_dict = defaultdict(list)
                     temp_dict["ChipID"] = int(line.strip().split()[3])
+                    temp_dict["i"] = entries
+                    entries+=1
                 else:
-                    # add to the dictionary
-                    data = line.strip().split()
-                    temp_dict[data[0]].append(data[1]) 
+                    if temp_dict != None:
+                        # add to the dictionary
+                        data = line.strip().split()
+                        temp_dict[data[0]].append(data[1]) 
 
         # Write the last piece as well
-        temp_dict["i"] = entries
         info.append(self.processDictionary(temp_dict))        
         f.close()
         return info
     
-    def createDataframe(self):
-        """Convert dictionary to dataframe."""
-        df = pd.DataFrame(self.dict)
-        df.set_index("i", inplace=True)
-        return df
-
     def processDictionary(self,d):
         """If item is a list, create new entries for each element in that list"""
         newdict = {}
@@ -53,7 +57,22 @@ class QIEDataframe:
             else:
                 newdict[k] = v
         return newdict
-    
+
+    def createDataframe(self):
+        """Convert dictionary to dataframe."""
+        df = pd.DataFrame(self.dict)
+        df.set_index("i", inplace=True)
+        return df
+
+    def readCutsMakerFile(inputfile):
+        """Read csv file from cutsmaker and convert to dataframe."""
+        with open(inputfile) as f:
+            l1 = f.readline()
+            l2 = f.readline()
+            header = "Status,%s" % (l2)
+        df = pd.read_csv(inputfile, skiprows=2, header=None, names=header.split(","))
+        df.index.name = "i"
+        return df
 
     def processDataframe(self):
         """Process the dataframe to remove missing values, i.e. chips with hard failures."""
@@ -94,6 +113,7 @@ class DataConversion:
         return float(dac*10./65536)
     
     def LookupDAC(self,dac,whichRes):
+        # Needs to be updated!! These are old values from Daryl's QIE10 code
         if whichRes == 0:
             if dac > 31810:
                 return -0.3185386*dac + 10195.6906
@@ -148,7 +168,7 @@ def sequences(val, seqindex):
     elif seqindex==12:
         return conv.convertHexToInt(val)/16.
     elif seqindex==13:
-        print "Converting val, to lookupDAC", val, conv.LookupDAC(conv.convertHexToInt(val),0)
+        #print "Converting val, to lookupDAC", val, conv.LookupDAC(conv.convertHexToInt(val),0)
         return conv.LookupDAC(conv.convertHexToInt(val),0)/25.
     elif seqindex==14:
         return conv.LookupDAC(conv.convertHexToInt(val),1)/25.
@@ -158,55 +178,3 @@ def sequences(val, seqindex):
         return conv.convertHexToInt(val)/1000. - 1
     elif seqindex==17:
         return conv.convertHexToInt(val)/100. - 10
-    
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Process QIE test data.')
-    parser.add_argument('inputfile', metavar='F',
-                        help='Input file containing QIE test data. Assumes by default that you give a cuts_all file. If file ends with .csv or .pkl, it will read that and make the dataframe from it.')
-    parser.add_argument('--out', dest='outfile',
-                        choices=['csv','pkl'],
-                        help='output type, options: csv, pkl')
-    parser.add_argument('--plot', dest='plot', action='store_true',
-                        default = False,
-                        help='Make plots')
-    parser.add_argument("--plotdir", dest="plotdir",
-                        help="Directory to store plots")
-    
-    args = parser.parse_args()
-
-    qiedf = None
-    if ".csv" in args.inputfile:
-        print "Reading from %s" % (args.inputfile)
-        qiedf = pd.read_csv(args.inputfile)
-    elif ".pkl" in args.inputfile:
-        print "Reading from %s" % (args.inputfile)
-        qiedf = pd.read_pickle(args.inputfile)
-    else:
-        print "Create dataframe from %s" % (args.inputfile)
-        qie = QIEDataframe(args.inputfile)
-        print "Processing dataframe..."
-        qie.processDataframe()
-        qiedf = qie.df
-        
-    #print qiedf
-
-    if args.outfile == "pkl":
-        qiedf.to_pickle("%s.pkl"%(args.inputfile.replace(".txt","")))
-    elif args.outfile == "csv":
-        qiedf.to_csv("%s.csv"%(args.inputfile.replace(".txt","")))
-
-    # Some analysis
-    #print qiedf.df[qiedf.df["10_1"]<0.35]
-    #print qiedf.df[qiedf.df["107_1"]>1]
-    #print qiedf.df[qiedf.df["108_1"]>1]
-    #print qiedf.df[qiedf.df["109_1"]>1]
-    #g1 = [11,12,16]
-    #print "Printing weird rows\n", qiedf.df.loc[g1,:]
-    
-    # plotting
-    if args.plot:
-        plotter = plotQIE.PlotQIE(qiedf)
-        if args.plotdir:
-            plotter.setOutputDir(args.plotdir)
-        plotter.plotAll()

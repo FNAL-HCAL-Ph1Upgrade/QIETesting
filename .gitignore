@@ -34,3 +34,6 @@
 *~
 *.d
 *.pcm
+
+# Plot directories
+plots*/

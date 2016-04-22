@@ -7,12 +7,13 @@
 ##################################
 
 import pandas as pd
+import numpy as np
 from collections import defaultdict
 from CutInfo11 import cutinfo11
 
 class QIEDataframe:
     def __init__(self,inputfile,fromCutsMaker=False):
-        self.input = inputfile
+        self.input = inputfile # this is now a list
         if not fromCutsMaker:
             self.dict = self.createDictionary(inputfile)
             self.df = self.createDataframe()
@@ -20,28 +21,29 @@ class QIEDataframe:
             self.dict = None
             self.df = self.readCutsMakerFile(inputfile)
 
-    def createDictionary(self,inputfile):
+    def createDictionary(self,inputfiles):
         """Create dataframe from the cuts_all file"""
         entries = 0
         info = []
         temp_dict = None
-        with open(inputfile) as f:
-            for line in f:
-                if "Chip Number" in line:
-                    # write what was there
-                    if temp_dict != None:
-                        info.append(self.processDictionary(temp_dict))
-                    # Prep for next
-                    temp_dict = defaultdict(list)
-                    temp_dict["ChipID"] = int(line.strip().split()[3])
-                    temp_dict["i"] = entries
-                    entries+=1
-                else:
-                    if temp_dict != None:
-                        # add to the dictionary
-                        data = line.strip().split()
-                        temp_dict[data[0]].append(data[1]) 
-
+        for inputfile in inputfiles:
+            with open(inputfile) as f:
+                for line in f:
+                    if "Chip Number" in line:
+                        # write what was there
+                        if temp_dict != None:
+                            info.append(self.processDictionary(temp_dict))
+                        # Prep for next
+                        temp_dict = defaultdict(list)
+                        temp_dict["ChipID"] = int(line.strip().split()[3])
+                        temp_dict["i"] = entries
+                        entries+=1
+                    else:
+                        if temp_dict != None:
+                            # add to the dictionary
+                            data = line.strip().split()
+                            temp_dict[data[0]].append(data[1]) 
+    
         # Write the last piece as well
         info.append(self.processDictionary(temp_dict))        
         f.close()
@@ -83,17 +85,65 @@ class QIEDataframe:
         # remove hard failures
         hardfailures = self.df.isnull().any(axis=1)
         total_hardfailures = hardfailures.sum()
-        print "Found %s chips with hard failures:" % total_hardfailures
-        print "\t%s" % hardfailures[hardfailures==True].index.values
+        print "Found %s chips with hard failures" % total_hardfailures
+        self.hardfailures = "%s/hard_failures.txt"%self.input[0].rpartition("/")[0]
+        with open(self.hardfailures, 'w') as f:
+            f.write("Total chips: %s \n" % len(self.df.index))
+            f.write("hard failures = %s\n" % (total_hardfailures))
+            f.write("Chips: \n%s" % "\n".join(["%s"%i for i in self.df[hardfailures==True]["ChipID"]]))
         self.df = self.df.dropna(axis=0)
-        
+        self.df_raw = self.df.copy()
+
         # Loop through the dataframe and convert values
         for cname, series in self.df.iteritems():
             cname_base = cname.split("_")[0]
             if cname_base in cutinfo11:
                 seq = cutinfo11[cname_base][1]
                 self.df[cname] = series.apply(lambda x: sequences(x, seq))
-        
+                self.df_raw[cname] = series.apply(lambda x: sequences(x, 5))
+
+    def checkHardFailures(self):
+        print "Checking hard failures"
+        # read the hard failure info
+        if not hasattr(self, 'hardfailures'):
+            print "No info on hard failures, exiting"
+            return
+        else:
+            outfile = open(("%s"%self.hardfailures).replace(".txt","_breakdown.txt"), 'w')
+            with open(self.hardfailures) as f:
+                f.readline()
+                f.readline()
+                f.readline()
+                with open(self.input[0].replace(".cuts_all",".raw")) as raw:
+                    current_chip = None
+                    for line in f:
+                        chipnum = line.strip()
+                        print chipnum
+                        foundchip = current_chip == chipnum
+                        b = None
+                        while not foundchip and b!='':
+                            b = raw.readline()
+                            if " Chip Number =   %s"%chipnum in b:
+                                foundchip = True
+                                current_chip = chipnum
+                        nextchip = False
+                        info = []
+                        while not nextchip:
+                            c = raw.readline()
+                            if "Chip Number" in c:
+                                nextchip = True
+                                current_chip = c.strip().split()[3]
+                            elif countLetters(c.strip()) > 4:
+                                info.append(c.strip())
+                        outfile.write("%s %s\n" % (chipnum, info[-1]))
+            outfile.close()
+                    
+def countLetters(word):
+    count = 0
+    for char in word:
+        if char.isalpha():
+            count += 1
+    return count
 
 class DataConversion:
     def __init__(self):
@@ -106,6 +156,13 @@ class DataConversion:
         else:
             return int(val,16)
 
+    def convertIntToHex(self,val):
+        # Checking for int doesn't work since it can also be a numpy.int64, etc
+        if type(val) is not int:
+            print "Need an integer to convert!"
+        else:
+            return hex(val).replace("0x","").upper()
+
     def convertHexToIntSigned(self,val):
         val_int = val if type(val) is not str else int(val,16)
         if val_int < 32768:
@@ -113,11 +170,26 @@ class DataConversion:
         else:
             return val_int - 65536
 
+    def convertIntSignedToHex(self,val):
+        if type(val) is not int:
+            print "Need an integer to convert!"
+        else:
+            if val > 0:
+                return hex(val).replace("0x","").upper()
+            else:
+                return hex(65536 + val).replace("0x","").upper()
+
     def getVoltOBD(self,dac):
         return float(dac*5./65536 + 2.5)
 
+    def getinverseVoltOBD(self,dac):
+        return int(round( (dac-2.5)*65536/5 ))
+
     def getVoltInt(self, dac):
         return float(dac*10./65536)
+
+    def getinverseVoltInt(self, dac):
+        return int(round( dac*65536/10 ))
     
     def LookupDAC(self,dac,whichRes):
         # Needs to be updated!! These are old values from Daryl's QIE10 code
@@ -185,3 +257,41 @@ def sequences(val, seqindex):
         return conv.convertHexToInt(val)/1000. - 1
     elif seqindex==17:
         return conv.convertHexToInt(val)/100. - 10
+
+def inversesequences(val, seqindex):
+    conv = DataConversion()
+    if seqindex==1:
+        return conv.convertIntSignedToHex(conv.getinverseVoltOBD(val*10))
+    elif seqindex==2:
+        return conv.convertIntSignedToHex(conv.getinverseVoltOBD(val))
+    elif seqindex==3:
+        return conv.convertIntSignedToHex(conv.getinverseVoltOBD( val*0.000181654 + 2.5 ))
+    elif seqindex==4:
+        return conv.convertIntSignedToHex(conv.getinverseVoltOBD( val + 2.5 ))
+    elif seqindex==5:
+        return conv.convertIntToHex(int(round(val)))
+    elif seqindex==6:
+        return conv.convertIntToHex(int(round(val*10)))
+    elif seqindex==7:
+        return conv.convertIntToHex(int(round(val*100.)))
+    elif seqindex==8:
+        return conv.convertIntToHex(int(round(val*1000.)))
+    elif seqindex==9:
+        return conv.convertIntToHex(int(round(val*10000.)))
+    elif seqindex==10:
+        return conv.convertIntToHex(int(round(val*2.)))
+    elif seqindex==11:
+        return conv.convertIntToHex(int(round(val*4.)))
+    elif seqindex==12:
+        return conv.convertIntToHex(int(round(val*16.)))
+    elif seqindex==13:
+        #print "Converting val, to lookupDAC", val, conv.LookupDAC(conv.convertHexToInt(val),0)
+        return conv.LookupDAC(conv.convertHexToInt(val),0)/25.
+    elif seqindex==14:
+        return conv.LookupDAC(conv.convertHexToInt(val),1)/25.
+    elif seqindex==15:
+        return conv.convertIntToHex(int(round(val/100)))
+    elif seqindex==16:
+        return conv.convertIntToHex( int(round( (val+1)*1000. )))
+    elif seqindex==17:
+        return conv.convertIntToHex( int(round( (val+10)*100. )))

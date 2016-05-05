@@ -12,9 +12,13 @@ from collections import defaultdict
 from CutInfo11 import cutinfo11
 
 class QIEDataframe:
-    def __init__(self,inputfile,fromCutsMaker=False):
+    def __init__(self,inputfile,fromCutsMaker=False,phasetest=False,addLocation=False):
         self.input = inputfile # this is now a list
-        if not fromCutsMaker:
+        self.addLocation = addLocation
+        if phasetest:
+            self.dict = self.createDictionaryPhases(inputfile)
+            self.df = self.createDataframe()
+        elif not fromCutsMaker:
             self.dict = self.createDictionary(inputfile)
             self.df = self.createDataframe()
         else:
@@ -28,6 +32,9 @@ class QIEDataframe:
         temp_dict = None
         for inputfile in inputfiles:
             with open(inputfile) as f:
+                location = None
+                if self.addLocation:
+                    location = open(inputfile.replace("qie11.dat.cuts_all","ChipLocationInfo.txt"))
                 for line in f:
                     if "Chip Number" in line:
                         # write what was there
@@ -35,14 +42,62 @@ class QIEDataframe:
                             info.append(self.processDictionary(temp_dict))
                         # Prep for next
                         temp_dict = defaultdict(list)
-                        temp_dict["ChipID"] = int(line.strip().split()[3])
+                        try:
+                            temp_dict["ChipID"] = int(line.strip().split()[3])
+                        except ValueError:
+                            print line
+                            raise
+                            
                         temp_dict["i"] = entries
                         entries+=1
+                        # read in location info, assumes same ordering and no missing info
+                        if self.addLocation:
+                            locinfo = location.readline()
+                            loclist = locinfo.strip().split("-")
+                            if int(loclist[0]) != temp_dict["ChipID"]:
+                                print "Location (%s) doesn't match ChipID (%s)!" % (localist[0], temp_dict["ChipID"])
+                            else:
+                                temp_dict["Tray"]   = loclist[1]
+                                temp_dict["Row"]    = loclist[2]
+                                temp_dict["Column"] = loclist[3]
                     else:
                         if temp_dict != None:
                             # add to the dictionary
                             data = line.strip().split()
                             temp_dict[data[0]].append(data[1]) 
+                if self.addLocation:
+                    location.close()
+    
+        # Write the last piece as well
+        info.append(self.processDictionary(temp_dict))        
+        f.close()
+        return info
+    
+    def createDictionaryPhases(self,inputfiles):
+        """Create dataframe from the phases file. Chip number is in the filename"""
+        entries = 0
+        info = []
+        temp_dict = None
+        for inputfile in inputfiles:
+            chipid = inputfile.split("/")[-1].split("_")[0]
+            # write what was there
+            if temp_dict != None:
+                info.append(self.processDictionary(temp_dict))
+            # Prep for next
+            temp_dict = defaultdict(list)
+            try:
+                temp_dict["ChipID"] = int(chipid)
+            except ValueError:
+                print chipid
+                raise
+            temp_dict["i"] = entries
+            entries+=1
+            with open(inputfile) as f:
+                for line in f:
+                    if temp_dict != None:
+                        # add to the dictionary
+                        data = line.strip().split()
+                        temp_dict[data[0]].append(data[1]) 
     
         # Write the last piece as well
         info.append(self.processDictionary(temp_dict))        
@@ -84,6 +139,7 @@ class QIEDataframe:
         """Process the dataframe to remove missing values, i.e. chips with hard failures."""
         # remove hard failures
         hardfailures = self.df.isnull().any(axis=1)
+        print hardfailures.head()
         total_hardfailures = hardfailures.sum()
         print "Found %s chips with hard failures" % total_hardfailures
         self.hardfailures = "%s/hard_failures.txt"%self.input[0].rpartition("/")[0]

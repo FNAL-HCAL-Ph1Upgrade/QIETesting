@@ -24,8 +24,8 @@ if __name__ == "__main__":
 
 
     with open("hardfailures.tex",'w') as f:
-        f.write("\\begin{tabular}{l||c|c|c|c||c|c|c}\n")
-        f.write("Wafer & capid & registers & DLL & mux & Total & \\#chips & \\% failures \\\\ \\hline \\hline \n")
+        f.write("\\begin{tabular}{l||c|c|c|c|c||c|c|c}\n")
+        f.write("Wafer & power & capid & registers & DLL & mux & Total & \\#chips & \\% failures \\\\ \\hline \\hline \n")
         total_info = defaultdict(int)
         total_chips_list = []
         # Go through all input files and get info
@@ -46,26 +46,29 @@ if __name__ == "__main__":
                 total_chips = chipf.readline().strip().split()[-1]
             total_chips_list.append(int(total_chips))
             # Write info
-            if len(info) > 4:
+            if len(info) > 5:
                 print "More failure modes present"
-            f.write("%s & %s & %s & %s & %s & %s & %s & %.1f \\%%\\\\ \n" % (wafer,
-                                                                        info["capid_test"],
-                                                                        info["qie10_registers"],
-                                                                        info["hist_results"],
-                                                                        info["local_muxed_adcs"],
-                                                                        mysum(info),
-                                                                        total_chips,
-                                                                        mysum(info)/float(total_chips)*100)
+                print info
+            f.write("%s & %s & %s & %s & %s & %s & %s & %s & %.1f \\%%\\\\ \n" % (wafer,
+                                                                                  info["power_test"],
+                                                                                  info["capid_test"],
+                                                                                  info["qie10_registers"],
+                                                                                  info["hist_results"],
+                                                                                  info["local_muxed_adcs"],
+                                                                                  mysum(info),
+                                                                                  total_chips,
+                                                                                  mysum(info)/float(total_chips)*100)
                     )
 
         f.write("\\hline \n")
-        f.write("Total & %s & %s & %s & %s & %s & %s & %.1f \\%%\\\\ \n" % (total_info["capid_test"],
-                                                                            total_info["qie10_registers"],
-                                                                            total_info["hist_results"],
-                                                                            total_info["local_muxed_adcs"],
-                                                                            mysum(total_info),
-                                                                            sum(total_chips_list),
-                                                                            mysum(total_info)/float(sum(total_chips_list))*100)
+        f.write("Total & %s & %s & %s & %s & %s & %s & %s & %.1f \\%%\\\\ \n" % (total_info["power_test"],
+                                                                                 total_info["capid_test"],
+                                                                                 total_info["qie10_registers"],
+                                                                                 total_info["hist_results"],
+                                                                                 total_info["local_muxed_adcs"],
+                                                                                 mysum(total_info),
+                                                                                 sum(total_chips_list),
+                                                                                 mysum(total_info)/float(sum(total_chips_list))*100)
                 )
         f.write("\\end{tabular}\n")
 

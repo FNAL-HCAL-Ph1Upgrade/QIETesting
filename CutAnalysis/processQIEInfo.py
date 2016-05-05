@@ -39,6 +39,15 @@ if __name__ == "__main__":
     parser.add_argument('--hardfailures', dest='hardfailures', 
                         default = False, action='store_true',
                         help='Investigate hard failures.')
+    parser.add_argument('--yields', dest='yields', 
+                        default = False, action='store_true',
+                        help='Make yields table. This is done automatically when making plots.')
+    parser.add_argument('--phasetest', dest='phasetest', 
+                        default = False, action='store_true',
+                        help='Phase test information (uses different format).')
+    parser.add_argument('--addlocation', dest='addlocation', 
+                        default = False, action='store_true',
+                        help='Add location information, needed if you want to make a sorting file.')
     parser.add_argument('-v', '--verbose', dest="v",
                         default=False, action='store_true',
                         help="Be more verbose")
@@ -73,7 +82,7 @@ if __name__ == "__main__":
 
     else:
         print "Create dataframe from %s" % (args.inputfile)
-        qie = readQIE.QIEDataframe(args.inputfile, args.fromCutsMaker)
+        qie = readQIE.QIEDataframe(args.inputfile, args.fromCutsMaker, args.phasetest, args.addlocation)
         if args.v:
             print "Head of unprocessed dataframe"
             print qie.df.head()
@@ -118,7 +127,7 @@ if __name__ == "__main__":
     # Step 4: Make a bunch of plots if desired
     # Feel free to customize at will
     # -------------------------------------------------
-    if args.plot:
+    if args.plot or args.yields:
         plotter = plotQIE.PlotQIE(qiedf)
         # Set output directory
         if args.plotdir:
@@ -128,7 +137,13 @@ if __name__ == "__main__":
             plotter.setCutFile(args.cutfile)
         elif os.path.isfile("qie11.cts"):
             plotter.setCutFile("qie11.cts")
-        plotter.plotAll()
+        # Make the plots and/or yields table
+        if args.phasetest:
+            plotter.plotPhases()
+        elif args.yields:
+            plotter.makeGroupsFromCutFile()
+        else:
+            plotter.plotAll()
         #plotter.plotAllZoomed()
 
     # -------------------------------------------------

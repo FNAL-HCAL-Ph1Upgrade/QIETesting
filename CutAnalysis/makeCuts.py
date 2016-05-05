@@ -23,8 +23,8 @@ def get3cluster(data):
     #print "2:", sum(mylabels == 2)
     return mylabels
 
-def pruneclusters(data, thresh=0.02, max_iterations=5):
-    print "Getting three clusters"
+def pruneclusters(data, thresh=0.02, max_iterations=6):
+    #print "Getting three clusters"
     # first get rid of a potential third cluster
     three_labels = get3cluster(data)
     sum_three_labels = [sum(three_labels == i) for i in range(3)]
@@ -63,7 +63,7 @@ def getcorebounds(data, padding=0.1, **kwargs):
     #width = (core_max - core_min) if (core_max - core_min > 0) else core_min*0.01
     std = core.std()
     extra = std if std > 0 else (core_min*0.002 if core_min > 0 else 1) #padding * width 
-    print "min = %s, max = %s, extra = %s" % (core_min, core_max, extra)
+    #print "min = %s, max = %s, extra = %s" % (core_min, core_max, extra)
     return (core_min-extra if (core_min-extra > 0 or core_min < 0) else 0, core_max+extra)
 
 def checkBounds(bound):
@@ -99,6 +99,7 @@ def makeCutsFile(dataframe, **kwargs):
                           ]
 
         # Handle fixed bounds
+        # Marginal is by default what the algorithm found, only overwrite if needed
         if info[5] != None:
             if info[5][0] != None:
                 cutbounds[cut][0] = readQIE.inversesequences(info[5][0], seqnr)
@@ -106,9 +107,18 @@ def makeCutsFile(dataframe, **kwargs):
             if info[5][1] != None:
                 cutbounds[cut][1] = readQIE.inversesequences(info[5][1], seqnr)
                 cutbounds[cut][3] = readQIE.inversesequences(info[5][1], seqnr)
+            #if info[5][2] != None:
+            #    cutbounds[cut][2] = readQIE.inversesequences(info[5][2], seqnr)
+            #if info[5][3] != None:
+            #    cutbounds[cut][3] = readQIE.inversesequences(info[5][3], seqnr)
 
         cutbounds[cut] = [checkBounds(b) for b in cutbounds[cut]]
-
+        # make sure marginal is not tighter than good
+        if cutbounds[cut][0] < cutbounds[cut][2]:
+            cutbounds[cut][2] = cutbounds[cut][0]
+        if cutbounds[cut][1] > cutbounds[cut][3]:
+            cutbounds[cut][3] = cutbounds[cut][1]
+        
     writeCutsFile(cutbounds, **kwargs)
 
 def writeCutsFile(cutbounds, cutfilename="qie11.cts"):

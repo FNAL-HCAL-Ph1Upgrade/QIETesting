@@ -52,21 +52,21 @@ cutinfo11 = {
     "48" : ["IDCSet 1e Voltage [V]", 2, 200, 1.0,  1.45, None],
     "49" : ["IDCSet 1f Voltage [V]", 2, 200, 1.0,  1.45, None],
     
-    "50" : ["LVDS Average Midpoint [V]", 2, 40, 1.23, 1.27, (1.25, 1.27)],
+    "50" : ["LVDS Average Midpoint [V]", 2, 40, 1.23, 1.27, (1.25, 1.27, None, None)],
     
-    "51" : ["Mantissa Sum Range 0", 5, 60, 0    , 3000 , None],
-    "52" : ["Mantissa Sum Range 1", 5, 40, 12000, 16000, None],
+    "51" : ["Mantissa Sum Range 0", 5, 60, 0    , 3000 , (1600, 3000, None, None)],
+    "52" : ["Mantissa Sum Range 1", 5, 40, 12000, 16000, (13000, 15500, None, None)],
     "53" : ["Mantissa Sum Range 2", 5, 40, 30000, 50000, None],
     "54" : ["Mantissa Sum Range 3", 5, 40, 0    , 80000, None],
 
-    "55" : ["Integrated Pulse 0, Charge [fC]", 5, 100, 0   , 500, None],
-    "56" : ["Integrated Pulse 1, Charge [fC]", 5, 100, 0   , 500, None],
-    "57" : ["Integrated Pulse 2, Charge [fC]", 5, 100, 250 , 750, None],
-    "58" : ["Integrated Pulse 3, Charge [fC]", 5, 100, 700 , 1200, None],
-    "59" : ["Integrated Pulse 4, Charge [fC]", 5, 100, 1300, 1800, None],
-    "60" : ["Integrated Pulse 5, Charge [fC]", 5, 100, 2800, 3800, None],
+    "55" : ["Integrated Pulse 0, Charge [fC]", 5, 100, 0   , 500, (150, 350, None, None)],
+    "56" : ["Integrated Pulse 1, Charge [fC]", 5, 100, 0   , 500, (240, 450, None, None)],
+    "57" : ["Integrated Pulse 2, Charge [fC]", 5, 100, 250 , 750, (420, 640, None, None)],
+    "58" : ["Integrated Pulse 3, Charge [fC]", 5, 100, 700 , 1200, (800, 1000, None, None)],
+    "59" : ["Integrated Pulse 4, Charge [fC]", 5, 100, 1300, 1800, (1450, 1700, None, None)],
+    "60" : ["Integrated Pulse 5, Charge [fC]", 5, 100, 2800, 3800, (2950, 3250, None, None)],
     "61" : ["Integrated Pulse 6, Charge [fC]", 5, 100, 5500, 6500, None],
-    "62" : ["Integrated Pulse 7, Charge [fC]", 5, 100, 8000, 9000, (7500,10000)],
+    "62" : ["Integrated Pulse 7, Charge [fC]", 5, 100, 8000, 9000, (7500,10000,None,None)],
 
 #     "63" : [r'Treshold DAC 00, Charge [$\mu$A]', 5, 50, 0, 2000, None], #13
 #     "64" : [r'Treshold DAC 01, Charge [$\mu$A]', 5, 50, 0, 2000, None], #13
@@ -81,9 +81,9 @@ cutinfo11 = {
     "64" : [r'Treshold DAC 01, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
     "65" : [r'Treshold DAC 02, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
     "66" : [r'Treshold DAC 04, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
-    "67" : [r'Treshold DAC 08, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
-    "68" : [r'Treshold DAC 10, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
-    "69" : [r'Treshold DAC 20, Charge [$\mu$A]', 5, 50, 0, 35000, None], #13
+    "67" : [r'Treshold DAC 08, Charge [$\mu$A]', 5, 50, 0, 35000, (25000, None, None, None)], #13
+    "68" : [r'Treshold DAC 10, Charge [$\mu$A]', 5, 50, 0, 35000, (20000, None, None, None)], #13
+    "69" : [r'Treshold DAC 20, Charge [$\mu$A]', 5, 50, 0, 35000, (7500, 15000, None, None)], #13
     "70" : [r'Treshold DAC 40, Charge [$\mu$A]', 5, 50, 0, 35000, None], #14
     "71" : [r'Treshold DAC 80, Charge [$\mu$A]', 5, 50, 0, 35000, None], #14
 
@@ -92,7 +92,7 @@ cutinfo11 = {
 
     "74" : ["InSig Voltage [V]", 2, 40, 0.5, 0.55, None],
     "75" : ["InRef Voltage [V]", 2, 40, 0.5, 0.55, None],
-    "76" : ["Difference InSig-InRef Voltage [V]", 4, 60, 0, 0.0015, None],
+    "76" : ["Difference InSig-InRef Voltage [V]", 4, 60, 0, 0.0015, (0, 0.0015, None, None)],
 
 #     "77" : [r'Timing InRefDAC 0 [$\mu$A]', 5, 50, 0.0, 200.0, None], #13
 #     "78" : [r'Timing InRefDAC 1 [$\mu$A]', 5, 50, 0.0, 200.0, None], #13
@@ -105,20 +105,20 @@ cutinfo11 = {
     "77" : [r'Timing InRefDAC 0 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
     "78" : [r'Timing InRefDAC 1 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
     "79" : [r'Timing InRefDAC 2 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
-    "80" : [r'Timing InRefDAC 3 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
-    "81" : [r'Timing InRefDAC 4 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
-    "82" : [r'Timing InRefDAC 5 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
-    "83" : [r'Timing InRefDAC 6 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
-    "84" : [r'Timing InRefDAC 7 [$\mu$A]', 5, 50, 0.0, 35000, None], #13
+    "80" : [r'Timing InRefDAC 3 [$\mu$A]', 5, 50, 0.0, 35000, (26000, 34000, None, None)], #13
+    "81" : [r'Timing InRefDAC 4 [$\mu$A]', 5, 50, 0.0, 35000, (24000, 34000, None, None)], #13
+    "82" : [r'Timing InRefDAC 5 [$\mu$A]', 5, 50, 0.0, 35000, (23000, 31000, None, None)], #13
+    "83" : [r'Timing InRefDAC 6 [$\mu$A]', 5, 50, 0.0, 35000, (21000, 30000, None, None)], #13
+    "84" : [r'Timing InRefDAC 7 [$\mu$A]', 5, 50, 0.0, 35000, (20000, 30000, None, None)], #13
     "85" : ["Unused", 5, 20, 1279, 1281, None],
-    "86" : ["LVDS Trim 0 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "87" : ["LVDS Trim 0 Lo Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "88" : ["LVDS Trim 1 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "89" : ["LVDS Trim 1 Lo Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "90" : ["LVDS Trim 2 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "91" : ["LVDS Trim 2 Lo Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "92" : ["LVDS Trim 3 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
-    "93" : ["LVDS Trim 3 Lo Voltage [V]", 2, 90, 0.9, 1.5, (0.5, 2.0)],
+    "86" : ["LVDS Trim 0 Hi Voltage [V]", 2, 90, 0.9, 1.5, (1.1, 1.3, None, None)],
+    "87" : ["LVDS Trim 0 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.3, 1.4, None, None)],
+    "88" : ["LVDS Trim 1 Hi Voltage [V]", 2, 90, 0.9, 1.5, (1.0, 1.2, None, None)],
+    "89" : ["LVDS Trim 1 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.3, 1.43, None, None)],
+    "90" : ["LVDS Trim 2 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.95, 1.15, None, None)],
+    "91" : ["LVDS Trim 2 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.3, 1.5, None, None)],
+    "92" : ["LVDS Trim 3 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.9, 1.1, None, None)],
+    "93" : ["LVDS Trim 3 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.3, 1.5, None, None)],
 
 #     "94" : ["Impedance Diff RinSel=0 Voltage [V]", 5, 30, 15, 30, None],
 #     "95" : ["Insig-Clamp Diff RinSel=0 Voltage [V]", 5, 40, 0.05, 0.07, None],
@@ -130,12 +130,12 @@ cutinfo11 = {
 #     "101" : ["Insig-Clamp Diff RinSel=4 Voltage [V]", 5, 40, 0.05, 0.07, None], # was sequence 4
 #     "102" : ["Impedance Diff RinSel=8 Voltage [V]", 5, 30, 15, 30, None],
 #     "103" : ["Insig-Clamp Diff RinSel=8 Voltage [V]", 5, 40, 0.05, 0.07, None],
-    "94" : ["Impedance Diff RinSel=0 Voltage [V]", 5, 30, 39000, 40000, None],
-    "95" : ["Insig-Clamp Diff RinSel=0 Voltage [V]", 5, 40, 39000, 40000, None],
-    "96" : ["Impedance Diff RinSel=1 Voltage [V]", 5, 30, 39000, 40000, None], 
-    "97" : ["Insig-Clamp Diff RinSel=1 Voltage [V]", 5, 40, 39000, 40000, None],
-    "98" : ["Impedance Diff RinSel=2 Voltage [V]", 5, 30, 39000, 40000, None],
-    "99" : ["Insig-Clamp Diff RinSel=2 Voltage [V]", 5, 40, 39000, 40000, None],
+    "94" : ["Impedance Diff RinSel=0 Voltage [V]", 5, 30, 39000, 40000, (39250, 39900, None, None)],
+    "95" : ["Insig-Clamp Diff RinSel=0 Voltage [V]", 5, 40, 39000, 40000, (39250, 39900, None, None)],
+    "96" : ["Impedance Diff RinSel=1 Voltage [V]", 5, 30, 39000, 40000, (39250, 39900, None, None)], 
+    "97" : ["Insig-Clamp Diff RinSel=1 Voltage [V]", 5, 40, 39000, 40000, (39250, 39900, None, None)],
+    "98" : ["Impedance Diff RinSel=2 Voltage [V]", 5, 30, 39000, 40000, (39250, 39900, None, None)],
+    "99" : ["Insig-Clamp Diff RinSel=2 Voltage [V]", 5, 40, 39000, 40000, (39250, 39900, None, None)],
     "100" : ["Impedance Diff RinSel=4 Voltage [V]", 5, 30, 39000, 40000, None],  # was sequence 3
     "101" : ["Insig-Clamp Diff RinSel=4 Voltage [V]", 5, 40, 39000, 40000, None], # was sequence 4
     "102" : ["Impedance Diff RinSel=8 Voltage [V]", 5, 30, 39000, 40000, None],
@@ -145,10 +145,10 @@ cutinfo11 = {
     "104" : ["Unused", 5, 20, 1279, 1281, None],
     "105" : ["Unused", 5, 20, 1279, 1281, None],
     
-    "106" : ["Range Transition Max Error rate", 9, 40, 0, 10, (0,1)],
-    "107" : ["Range01 Transition Error rate", 9, 40, 0, 10, (0,1)],
-    "108" : ["Range12 Transition Error rate", 9, 40, 0, 10, (0,1)],
-    "109" : ["Range23 Transition Error rate", 9, 40, 0, 10, (0,1)],
+    "106" : ["Range Transition Max Error rate", 9, 40, 0, 10, (0,1,None,None)],
+    "107" : ["Range01 Transition Error rate", 9, 40, 0, 10, (0,1,None,None)],
+    "108" : ["Range12 Transition Error rate", 9, 40, 0, 10, (0,1,None,None)],
+    "109" : ["Range23 Transition Error rate", 9, 40, 0, 10, (0,1,None,None)],
     
     "110" : ["Local ADC 00", 2, 50, 1.1, 1.25, None],
     "111" : ["Local ADC 01", 2, 50, 1.1, 1.25, None],
@@ -183,14 +183,14 @@ cutinfo11 = {
     "139" : ["Transfer Gain_01", 12, 40, 85, 90, None],
     "140" : ["Transfer Gain_02", 12, 40, 79, 83, None],
     "141" : ["Transfer Gain_04", 12, 40, 67, 72, None],
-    "142" : ["Transfer Gain_08", 12, 40, 55, 65, None],
+    "142" : ["Transfer Gain_08", 12, 40, 55, 65, (58, 62, None, None)],
     "143" : ["Transfer Gain_10", 12, 40, 45, 65, None],
     
-    "144" : ["Hysteresis low 0", 5, 50, 30000, 35000, None],
+    "144" : ["Hysteresis low 0", 5, 50, 30000, 35000, (30000, 31500, None, None)],
     "145" : ["Hysteresis low 1", 5, 50, 30000, 35000, None],
-    "146" : ["Hysteresis high 0", 5, 50, 30000, 35000, None],
+    "146" : ["Hysteresis high 0", 5, 50, 30000, 35000, (30000, 31500, None, None)],
     "147" : ["Hysteresis high 1", 5, 50, 30000, 35000, None],
-    "148" : ["Hysteresis diff 0", 5, 50, 0, 1000, None],
+    "148" : ["Hysteresis diff 0", 5, 50, 0, 1000, (0, 600, None, None)],
     "149" : ["Hysteresis diff 1", 5, 50, 0, 150, None],
 
     "150" : ["Range0 Subrange0 Slope, Charge [fC], CAPID", 7, 50, 0.0, 10.0, None],
@@ -213,41 +213,43 @@ cutinfo11 = {
     "166" : ["Range0 Subrange0 Intercept, Charge [fC], CAPID", 7, 50, 0, 60, None],
     "167" : ["Range0 Subrange1 Intercept, Charge [fC], CAPID", 7, 50, 0, 100, None],
     "168" : ["Range0 Subrange2 Intercept, Charge [fC], CAPID", 6, 50, 200, 400, None],
-    "169" : ["Range0 Subrange3 Intercept, Charge [fC], CAPID", 6, 50, 600, 1200, None],
-    "170" : ["Range1 Subrange0 Intercept, Charge [fC], CAPID", 6, 50, 400, 800, None],
-    "171" : ["Range1 Subrange1 Intercept, Charge [fC], CAPID", 6, 50, 0, 400, None],
-    "172" : ["Range1 Subrange2 Intercept, Charge [fC], CAPID", 5, 50, 1000, 4000, None],
-    "173" : ["Range1 Subrange3 Intercept, Charge [fC], CAPID", 5, 50, 6500, 9000, None], 
-    "174" : ["Range2 Subrange0 Intercept, Charge [fC], CAPID", 5, 50, 34000, 38000, None],
-    "175" : ["Range2 Subrange1 Intercept, Charge [fC], CAPID", 5, 50, 30000, 35000, None],
-    "176" : ["Range2 Subrange2 Intercept, Charge [fC], CAPID", 5, 50, 10000, 22000, None],
-    "177" : ["Range2 Subrange3 Intercept, Charge [fC], CAPID", 10, 50, 4000, 10000, None],
-    "178" : ["Range3 Subrange0 Intercept, Charge [fC], CAPID", 10, 50, 10000, 20000, None],
-    "179" : ["Range3 Subrange1 Intercept, Charge [fC], CAPID", 5, 50, 35000, 55000, None],
-    "180" : ["Range3 Subrange2 Intercept, Charge [fC], CAPID", 11, 50, 2000, 8000, None],
+    "169" : ["Range0 Subrange3 Intercept, Charge [fC], CAPID", 6, 50, 600, 1200, (970, 1170, None, None)],
+    "170" : ["Range1 Subrange0 Intercept, Charge [fC], CAPID", 6, 50, 400, 800, (500, 650, None, None)],
+    "171" : ["Range1 Subrange1 Intercept, Charge [fC], CAPID", 6, 50, 0, 400, (70, 220, None, None)],
+    "172" : ["Range1 Subrange2 Intercept, Charge [fC], CAPID", 5, 50, 1000, 4000, (1500, 1900, None, None)],
+    "173" : ["Range1 Subrange3 Intercept, Charge [fC], CAPID", 5, 50, 6500, 9000, (7200, 8200, None, None)], 
+    "174" : ["Range2 Subrange0 Intercept, Charge [fC], CAPID", 5, 50, 2000, 38000, (None, 36200, None, None)],
+    "175" : ["Range2 Subrange1 Intercept, Charge [fC], CAPID", 5, 50, 28000, 35000, (None, 33200, None, None)],
+    "176" : ["Range2 Subrange2 Intercept, Charge [fC], CAPID", 5, 50, 10000, 22000, (15000, 19500, None, None)],
+    "177" : ["Range2 Subrange3 Intercept, Charge [fC], CAPID", 10, 50, 4000, 10000, (5500, 8000, None, None)],
+    "178" : ["Range3 Subrange0 Intercept, Charge [fC], CAPID", 10, 50, 10000, 20000, (16000, 19000, None, None)],
+    "179" : ["Range3 Subrange1 Intercept, Charge [fC], CAPID", 5, 50, 35000, 55000, (42000, 49000, None, None)],
+    "180" : ["Range3 Subrange2 Intercept, Charge [fC], CAPID", 11, 50, 2000, 8000, (3500, 5000, None, None)],
     "181" : ["Range3 Subrange3 Intercept, Charge [fC], CAPID", 12, 50, 1400, 2000, None],
     
-    "182" : ["ADC DNL", 16, 40, -0.5, 0.5, None],
+    "182" : ["ADC DNL", 16, 40, -0.5, 0.5, (-0.35, 0.35, None, None)],
     
-    "183" : ["Range Overlap 0-1, CAPID ", 7, 40, 0, 8, (1,None)],
-    "184" : ["Range Overlap 1-2, CAPID ", 7, 40, 0, 8, (-1,1)], 
-    "185" : ["Range Overlap 2-3, CAPID ", 7, 40, 0, 8, (1,None)],
+    "183" : ["Range Overlap 0-1, CAPID ", 7, 40, 0, 8, (1,5,None,None)],
+    "184" : ["Range Overlap 1-2, CAPID ", 7, 40, 0, 8, (-1,1,None,None)], 
+    "185" : ["Range Overlap 2-3, CAPID ", 7, 40, 0, 8, (1,None,None,None)],
     
-    "186" : ["Pedestal Mantissa, CAPID", 8, 40, 0, 10, None],
-    "187" : ["Pedestal DAC Slope High, Charge [fC]", 8, 40, 0.0, 1.0, None],
+    "186" : ["Pedestal Mantissa, CAPID", 8, 40, 0, 10, (2, 8, None, None)],
+    "187" : ["Pedestal DAC Slope High, Charge [fC]", 8, 40, 0.0, 1.0, (0.2, None, None, None)],
     
-    "188" : ["CAPID Pedestal DAC Slope, Charge [fC]", 8, 40, 0.0, 1.0, (0.1,None)],
+    "188" : ["CAPID Pedestal DAC Slope, Charge [fC]", 8, 40, 0.0, 1.0, (0.1,None,None,None)],
     
     "189" : ["Pedestal RMS CAPID ", 8, 40, 0.0, 1.0, None],
     
     "190" : ["TDC Bin Width [ns]", 8, 50, 0.47, 0.52, None],
-    "191" : ["TDC Vert Offset", 17, 40, -2.5, 2.5, None],
-    "192" : ["Sum4 Average", 5, 40, 2000, 4000, None],
+    "191" : ["TDC Vert Offset", 17, 40, -2.5, 2.5, (-2, 2, None, None)],
+    "192" : ["Sum4 Average", 5, 40, 2000, 4000, (3100, 3700, None, None)],
     "193" : ["Sum4 DNL", 16, 40, -0.025, 0.025, None],
+    "195" : ["Phase average", 5, 20, 0, 1000, None],
+    "196" : ["Phase", 5, 20, 0, 1000, None],
 }
 
 # cuts for which we want to combine measurements when making plots
-to_combine = ["86","87","88","89","90","91","92","93",
+to_combine = [#"86","87","88","89","90","91","92","93",
               "144","145","146","147",
               "182","187","191","193"]
 
@@ -264,7 +266,7 @@ cut_groups = [
     ( "LVDS", ["50"] + [("%s"%i).zfill(2) for i in range(86,94)] ),
     ( "Pedestal",["186","187","189"] ),
     ( "Transfer gain", [("%s"%i).zfill(2) for i in range(138,144)] ),
-    ( "Range", [ ("%s"%i).zfill(2) for i in (range(106,110) + range(183,186))]),
     ( "Slopes/intercept", [ ("%s"%i).zfill(2) for i in range(150,182)] ),
+    ( "Range", [ ("%s"%i).zfill(2) for i in (range(106,110) + range(183,186))]),
     ( "Other", [("%s"%i).zfill(2) for i in (range(18,50) + range(51,74) + range(77,85) + range(94,104) + range(110,138) + range(144,150) + ["182","188","189"] + range(190,194))] ),
     ]

@@ -11,6 +11,7 @@ import os, sys
 import matplotlib.pyplot as plt
 import matplotlib
 from collections import defaultdict
+import numpy as np
 
 class PlotQIE:
     def __init__(self, df):
@@ -61,7 +62,7 @@ Also prints a table with yields"""
                 g = None
                 # For each cut in that group
                 for cut in grouplist[1]:
-                    # Get min and max values (TODO: handle marginal cuts)
+                    # Get min and max values for main cuts (TODO: handle marginal cuts)
                     cut_min = self.cuts[cut][0]
                     cut_max = self.cuts[cut][1]
                     # For each df column corresponding to that cut (sometimes more than one measurement)
@@ -82,6 +83,11 @@ Also prints a table with yields"""
             labels.append("Good")
             yields.append(groups[-1].sum())
             self.makeYieldsTable(yields, labels)
+            # Add column to data frame containing "Good" (1), "bad" (0), "marginal" (2,..) info
+            self.qie["Sorting"] = np.where(groups[-1], 1, 0)
+            print sum(self.qie["Sorting"])
+            #print self.qie
+            self.makeSortingFile()
             return (groups, labels)
 
     def NotGroup(self,groups):
@@ -104,7 +110,11 @@ Also prints a table with yields"""
             f.write("\\hline \nTotal & %s & 100\\%% & 100\\%% \\\\ \n" % int(total_yield))
             f.write("\\end{tabular}\n")
         print "Wrote yields table"
-        sys.exit()
+
+    def makeSortingFile(self):
+        fname = "SortingAll.txt"
+        self.qie.to_csv(fname, columns=["ChipID","Tray","Row","Column","Sorting"],
+                        header=False, index=False)
 
     def plotVarGroup(self, var, series, groups=None, labels=None, postfix="", logy=True, fixedrange=False):
         """Make plot for a given variable, and divide the chips in provided groups.
@@ -288,6 +298,29 @@ Also prints a table with yields"""
         plt.savefig("%s/%s%s.pdf" % (self.outputdir, varnames[0][0], postfix))
         plt.clf()
 
+    def plotPhases(self):
+        # Prepare the figures environment
+        self.fig = plt.figure()
+        # Make plot for the individual cuts, and prepare dictionary for the others
+        g1 = (self.qie["195_1"] < 400) | (self.qie["195_1"] > 650)
+        g2 = None
+        for col in self.qie.columns.values:
+            if "196" in col:
+                gtemp = (self.qie[col] < 500) | (self.qie[col] > 1500)
+                if g2 is None:
+                    g2 = gtemp
+                else:
+                    g2 = g2 | gtemp
+        g2 = (g2 | (self.qie["196_33"] < 900) | (self.qie["196_5"] > 1200) | (self.qie["196_21"] > 1100) | (self.qie["196_22"] < 600)) & (~ g1)
+        g3 = ~(g1 | g2)
+        with open("phases_bad_chips.txt",'w') as f:
+            bad_chips = self.qie[~g3]["ChipID"]
+            f.write("\n".join([str(chip) for chip in bad_chips]))
+        for cname, series in self.qie.iteritems():
+            print "Making plot for %s" % (cname)
+            self.plotVarGroup(cname,series,[g1,g2,g3],labels=["Bad1","Bad2","Good"])
+            self.plotVarGroup(cname,series,[g1,g2,g3],labels=["Bad1","Bad2","Good"],postfix="_fixedrange",fixedrange=True)
+
     def plotAll(self):
         # Make some groups (these are series of True and False that select the rows to go in that group)
         # Also make the groups exclusive by excluding the previous ones, eg (~ g1)
@@ -306,6 +339,7 @@ Also prints a table with yields"""
         self.fig = plt.figure()
 
         # groups from the cutfile
+        print "getting groups"
         mygroups, mylabels = self.makeGroupsFromCutFile()
         
         # Make plot for the individual cuts, and prepare dictionary for the others
@@ -314,9 +348,10 @@ Also prints a table with yields"""
                 to_combine_dict[cname.split("_")[0]].append(cname)
             else:
                 print "Making plot for %s" % (cname)
-                self.plotVarGroup(cname,series,mygroups,labels=mylabels)
+                #self.plotVarGroup(cname,series,mygroups,labels=mylabels)
                 print "Making plot for %s in fixed range mode" % (cname)
-                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+                #self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+                #self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",
@@ -330,9 +365,10 @@ Also prints a table with yields"""
         # Use plotting function that takes in dataframe
         for k,v in to_combine_dict.iteritems():
             print "Making plot for %s" % (k)
-            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
+            #self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
             print "Making plot for %s in fixed range mode" % (k)
             self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+            #self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",

@@ -10,27 +10,25 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 from CutInfo11 import cutinfo11
+import glob
 
 class QIEDataframe:
-    def __init__(self,inputfile,fromCutsMaker=False,phasetest=False,addLocation=False):
+    def __init__(self,inputfile,fromCutsMaker=False,addLocation=False):
         self.input = inputfile # this is now a list
         self.addLocation = addLocation
-        if phasetest:
-            self.dict = self.createDictionaryPhases(inputfile)
-            self.df = self.createDataframe()
-        elif not fromCutsMaker:
-            self.dict = self.createDictionary(inputfile)
+        if not fromCutsMaker:
+            self.dict = self.createDictionary()
             self.df = self.createDataframe()
         else:
             self.dict = None
-            self.df = self.readCutsMakerFile(inputfile)
+            self.df = self.readCutsMakerFile()
 
-    def createDictionary(self,inputfiles):
+    def createDictionary(self):
         """Create dataframe from the cuts_all file"""
         entries = 0
         info = []
         temp_dict = None
-        for inputfile in inputfiles:
+        for inputfile in self.input:
             with open(inputfile) as f:
                 location = None
                 if self.addLocation:
@@ -57,9 +55,9 @@ class QIEDataframe:
                             if int(loclist[0]) != temp_dict["ChipID"]:
                                 print "Location (%s) doesn't match ChipID (%s)!" % (localist[0], temp_dict["ChipID"])
                             else:
-                                temp_dict["Tray"]   = loclist[1]
-                                temp_dict["Row"]    = loclist[2]
-                                temp_dict["Column"] = loclist[3]
+                                temp_dict["Tray"]   = int(loclist[1])
+                                temp_dict["Row"]    = int(loclist[2])
+                                temp_dict["Column"] = int(loclist[3])
                     else:
                         if temp_dict != None:
                             # add to the dictionary
@@ -73,12 +71,13 @@ class QIEDataframe:
         f.close()
         return info
     
-    def createDictionaryPhases(self,inputfiles):
+    def createDictionaryPhases(self):
         """Create dataframe from the phases file. Chip number is in the filename"""
         entries = 0
         info = []
         temp_dict = None
-        for inputfile in inputfiles:
+        inputfiles = []
+        for inputfile in self.input:
             chipid = inputfile.split("/")[-1].split("_")[0]
             # write what was there
             if temp_dict != None:
@@ -121,15 +120,15 @@ class QIEDataframe:
         df.set_index("i", inplace=True)
         return df
 
-    def readCutsMakerFile(self, inputfile):
+    def readCutsMakerFile(self):
         """Read csv file from cutsmaker and convert to dataframe."""
         header = ""
-        with open(inputfile) as f:
+        with open(self.inputfile[0]) as f:
             l1 = f.readline()
             l2 = f.readline()
             header = "Status,%s" % (l2)
             header = header.replace("Cuts","ChipID")
-        df = pd.read_csv(inputfile, skiprows=2, header=None, names=header.split(","))
+        df = pd.read_csv(self.inputfile[0], skiprows=2, header=None, names=header.split(","))
         df.index.name = "i"
         df.drop("Status", axis=1, inplace=True)
         df["ChipID"] = df["ChipID"].apply(lambda x: int(x.split()[-1]))
@@ -143,12 +142,18 @@ class QIEDataframe:
         total_hardfailures = hardfailures.sum()
         print "Found %s chips with hard failures" % total_hardfailures
         self.hardfailures = "%s/hard_failures.txt"%self.input[0].rpartition("/")[0]
-        with open(self.hardfailures, 'w') as f:
+        with open(self.hardfailures.replace("*",""), 'w') as f:
             f.write("Total chips: %s \n" % len(self.df.index))
             f.write("hard failures = %s\n" % (total_hardfailures))
             f.write("Chips: \n%s" % "\n".join(["%s"%i for i in self.df[hardfailures==True]["ChipID"]]))
+        if self.addLocation:
+            # print out location info of hard failures
+            hardfailuresdf = self.df[hardfailures]
+            hardfailuresdf["Sorting"] = 0
+            hardfailuresdf.to_csv("SortingAllHardFail.txt", columns=["ChipID","Tray","Row","Column","Sorting"],
+                                header=False, index=False)
         self.df = self.df.dropna(axis=0)
-        self.df_raw = self.df.copy()
+        #self.df_raw = self.df.copy()
 
         # Loop through the dataframe and convert values
         for cname, series in self.df.iteritems():
@@ -156,7 +161,7 @@ class QIEDataframe:
             if cname_base in cutinfo11:
                 seq = cutinfo11[cname_base][1]
                 self.df[cname] = series.apply(lambda x: sequences(x, seq))
-                self.df_raw[cname] = series.apply(lambda x: sequences(x, 5))
+                #self.df_raw[cname] = series.apply(lambda x: sequences(x, 5))
 
     def checkHardFailures(self):
         print "Checking hard failures"
@@ -184,7 +189,8 @@ class QIEDataframe:
                                 current_chip = chipnum
                         nextchip = False
                         info = []
-                        while not nextchip:
+                        c = None
+                        while not nextchip and c!="":
                             c = raw.readline()
                             if "Chip Number" in c:
                                 nextchip = True

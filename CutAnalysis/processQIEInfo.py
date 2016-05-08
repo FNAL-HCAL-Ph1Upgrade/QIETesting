@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     else:
         print "Create dataframe from %s" % (args.inputfile)
-        qie = readQIE.QIEDataframe(args.inputfile, args.fromCutsMaker, args.phasetest, args.addlocation)
+        qie = readQIE.QIEDataframe(args.inputfile, args.fromCutsMaker, args.addlocation)
         if args.v:
             print "Head of unprocessed dataframe"
             print qie.df.head()

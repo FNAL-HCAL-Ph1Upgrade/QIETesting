@@ -50,6 +50,19 @@ python processQIEInfo.py qie11.dat.cuts_all.pkl --plot --plotdir mytest
 python processQIEInfo.py QIE11.output.txt --fromCutsMaker --out pkl --plot --plotdir mytest
 ```
 
+### Making a sorting file
+
+Use the `getSorting.py` script to create a sorting file, e.g.
+```
+python getSorting.py 162 163 164 165 166 167 -o Sorting_162-163-164-165-166-167.txt
+```
+As input you need the full sorting file obtained from running on the full qie data, the sorting file for all the hard failures, and a list of chips that fail the phase test. 
+
+After obtaining the sorting file, you need to convert the EOL character to that in windows:
+```
+awk 'sub("$", "\r")' Sorting.txt > Sorting_windows.txt
+```
+
 
 ### Using Daryl's code
 

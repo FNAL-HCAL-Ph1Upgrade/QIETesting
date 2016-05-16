@@ -188,8 +188,9 @@ Also prints a table with yields"""
         plt.gcf().subplots_adjust(bottom=0.12)
 
         # Add mean and std info
-        mean = series.mean()
-        std = series.std()
+        # Only use info on good chips, should be the last group in the list
+        mean = dfs[-1].mean() #series.mean()
+        std = dfs[-1].std() #series.std()
         plt.figtext(0.4, 0.92,
                     "Mean: %.3g      Std/Mean: %.3g\nStd: %.3g"%(mean, std/mean, std),
                     fontsize=self.ticklabelsize)
@@ -277,8 +278,9 @@ Also prints a table with yields"""
         plt.gcf().subplots_adjust(bottom=0.12)
 
         # Add mean and std info
-        mean = series.stack().mean()
-        std = series.stack().std()
+        # Only use info on good chips, should be the last group in the list
+        mean = dfs[-1].mean() #series.stack().mean()
+        std = dfs[-1].std() #series.stack().std()
         plt.figtext(0.4, 0.92,
                     "Mean: %.3g      Std/Mean: %.3g\nStd: %.3g"%(mean, std/mean, std),
                     fontsize=self.ticklabelsize)
@@ -348,10 +350,10 @@ Also prints a table with yields"""
                 to_combine_dict[cname.split("_")[0]].append(cname)
             else:
                 print "Making plot for %s" % (cname)
-                #self.plotVarGroup(cname,series,mygroups,labels=mylabels)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels)
                 print "Making plot for %s in fixed range mode" % (cname)
-                #self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-                #self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",
@@ -365,10 +367,10 @@ Also prints a table with yields"""
         # Use plotting function that takes in dataframe
         for k,v in to_combine_dict.iteritems():
             print "Making plot for %s" % (k)
-            #self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
+            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
             print "Making plot for %s in fixed range mode" % (k)
             self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-            #self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",

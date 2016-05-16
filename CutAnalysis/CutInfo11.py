@@ -111,14 +111,14 @@ cutinfo11 = {
     "83" : [r'Timing InRefDAC 6 [$\mu$A]', 5, 50, 0.0, 35000, (21000, 30000, None, None)], #13
     "84" : [r'Timing InRefDAC 7 [$\mu$A]', 5, 50, 0.0, 35000, (20000, 30000, None, None)], #13
     "85" : ["Unused", 5, 20, 1279, 1281, None],
-    "86" : ["LVDS Trim 0 Hi Voltage [V]", 2, 90, 0.9, 1.5, (1.13, 1.22, None, None)],
-    "87" : ["LVDS Trim 0 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.29, 1.38, None, None)],
-    "88" : ["LVDS Trim 1 Hi Voltage [V]", 2, 90, 0.9, 1.5, (1.06, 1.15, None, None)],
-    "89" : ["LVDS Trim 1 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.32, 1.41, None, None)],
-    "90" : ["LVDS Trim 2 Hi Voltage [V]", 2, 90, 0.9, 1.5, (1.01, 1.10, None, None)],
-    "91" : ["LVDS Trim 2 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.37, 1.46, None, None)],
-    "92" : ["LVDS Trim 3 Hi Voltage [V]", 2, 90, 0.9, 1.5, (0.96, 1.05, None, None)],
-    "93" : ["LVDS Trim 3 Lo Voltage [V]", 2, 90, 0.9, 1.5, (1.38, 1.47, None, None)],
+    "86" : ["LVDS Trim 0 Hi Voltage [V], pin", 2, 90, 0.9, 1.5, (1.13, 1.22, None, None)],
+    "87" : ["LVDS Trim 0 Lo Voltage [V], pin", 2, 90, 0.9, 1.5, (1.29, 1.38, None, None)],
+    "88" : ["LVDS Trim 1 Hi Voltage [V], pin", 2, 90, 0.9, 1.5, (1.06, 1.15, None, None)],
+    "89" : ["LVDS Trim 1 Lo Voltage [V], pin", 2, 90, 0.9, 1.5, (1.32, 1.41, None, None)],
+    "90" : ["LVDS Trim 2 Hi Voltage [V], pin", 2, 90, 0.9, 1.5, (1.01, 1.10, None, None)],
+    "91" : ["LVDS Trim 2 Lo Voltage [V], pin", 2, 90, 0.9, 1.5, (1.37, 1.46, None, None)],
+    "92" : ["LVDS Trim 3 Hi Voltage [V], pin", 2, 90, 0.9, 1.5, (0.96, 1.05, None, None)],
+    "93" : ["LVDS Trim 3 Lo Voltage [V], pin", 2, 90, 0.9, 1.5, (1.38, 1.47, None, None)],
 
 #     "94" : ["Impedance Diff RinSel=0 Voltage [V]", 5, 30, 15, 30, None],
 #     "95" : ["Insig-Clamp Diff RinSel=0 Voltage [V]", 5, 40, 0.05, 0.07, None],
@@ -179,12 +179,12 @@ cutinfo11 = {
     "136" : ["Local ADC 62", 2, 20, 2.545, 2.547, None],
     "137" : ["Local ADC 63", 2, 50, 0.43, 0.47, None],
 
-    "138" : ["Transfer Gain_00", 12, 40, 97, 102, None],
-    "139" : ["Transfer Gain_01", 12, 40, 85, 90, None],
-    "140" : ["Transfer Gain_02", 12, 40, 79, 83, (79.5, 82.5, None, None)],
-    "141" : ["Transfer Gain_04", 12, 40, 62, 78, None],
-    "142" : ["Transfer Gain_08", 12, 40, 55, 65, (58, 63, None, None)],
-    "143" : ["Transfer Gain_10", 12, 40, 45, 65, None],
+    "138" : ["Transfer Gain 00", 12, 40, 97, 102, None],
+    "139" : ["Transfer Gain 01", 12, 40, 85, 90, None],
+    "140" : ["Transfer Gain 02", 12, 40, 79, 83, (79.5, 82.5, None, None)],
+    "141" : ["Transfer Gain 04", 12, 40, 62, 78, None],
+    "142" : ["Transfer Gain 08", 12, 40, 55, 65, (58, 63, None, None)],
+    "143" : ["Transfer Gain 10", 12, 40, 45, 65, None],
     
     "144" : ["Hysteresis low 0", 5, 50, 30000, 35000, (30000, 31500, None, None)],
     "145" : ["Hysteresis low 1", 5, 50, 30000, 35000, None],
@@ -245,11 +245,11 @@ cutinfo11 = {
     "192" : ["Sum4 Average", 5, 40, 2000, 4000, (3000, 3500, None, None)],
     "193" : ["Sum4 DNL", 16, 40, -0.025, 0.025, None],
     #"195" : ["TDC bin width from phase (ps)", 5, 50, 0, 1500, None],
-    #"196" : ["phase fit offset)", 5, 50, 0, 2000, None],
+    #"196" : ["phase fit offset", 5, 50, 0, 2000, None],
 }
 
 # cuts for which we want to combine measurements when making plots
-to_combine = ["86","87","88","89","90","91","92","93",
+to_combine = [#"86","87","88","89","90","91","92","93",
               "144","145","146","147",
               "182","187","191","193"]
 

@@ -37,3 +37,13 @@
 
 # Plot directories
 plots*/
+
+# TeX files
+*.tex
+*.aux
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.toc

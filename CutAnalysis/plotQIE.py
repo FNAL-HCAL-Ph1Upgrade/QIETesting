@@ -308,7 +308,7 @@ Also prints a table with yields"""
         g2 = None
         for col in self.qie.columns.values:
             if "196" in col:
-                gtemp = (self.qie[col] < 500) | (self.qie[col] > 1500)
+                gtemp = (self.qie[col] < 500) | (self.qie[col] > 1600)
                 if g2 is None:
                     g2 = gtemp
                 else:
@@ -326,13 +326,13 @@ Also prints a table with yields"""
     def plotAll(self):
         # Make some groups (these are series of True and False that select the rows to go in that group)
         # Also make the groups exclusive by excluding the previous ones, eg (~ g1)
-        g1 = (self.qie["01_1"]>0.075) | (self.qie["02_1"] < 0.026) | (self.qie["03_1"] > 0.072) | (self.qie["04_1"] < 0.026) # current
-        g2 = ((self.qie["107_1"]>1) | (self.qie["108_1"]>1) | (self.qie["109_1"]>1)) & (~ g1) # range transition 
-        g3 = ((self.qie["138_1"] < 97) | (self.qie["139_1"] < 85) | (self.qie["140_1"]<79) | (self.qie["141_1"]<66) | (self.qie["142_1"]<55) | (self.qie["143_1"]<48)) & (~ g2) # transfer gain
-        g4 = ((self.qie["150_1"]>10) | (self.qie["151_1"]<5) | (self.qie["151_1"]>10) | (self.qie["152_1"]<10) | (self.qie["152_1"]>20) | (self.qie["153_1"] < 20) | (self.qie["153_1"] > 30) | (self.qie["166_1"] > 300)) & (~ g3) # Slope/intercept issue
-        g5 = ((self.qie["186_1"] > 10) | (self.qie["187_1"] > 1.5)) & (~ g4) # Pedestal issue
-        g6 = ((self.qie["10_1"] < 0.35) | (self.qie["93_1"] < 1.39) | (self.qie["93_1"] > 1.46)) & (~ g5) # Other
-        g7 = ~ (g1 | g2 | g3 | g4 | g5 | g6) # everything else
+        #g1 = (self.qie["01_1"]>0.075) | (self.qie["02_1"] < 0.026) | (self.qie["03_1"] > 0.072) | (self.qie["04_1"] < 0.026) # current
+        #g2 = ((self.qie["107_1"]>1) | (self.qie["108_1"]>1) | (self.qie["109_1"]>1)) & (~ g1) # range transition 
+        #g3 = ((self.qie["138_1"] < 97) | (self.qie["139_1"] < 85) | (self.qie["140_1"]<79) | (self.qie["141_1"]<66) | (self.qie["142_1"]<55) | (self.qie["143_1"]<48)) & (~ g2) # transfer gain
+        #g4 = ((self.qie["150_1"]>10) | (self.qie["151_1"]<5) | (self.qie["151_1"]>10) | (self.qie["152_1"]<10) | (self.qie["152_1"]>20) | (self.qie["153_1"] < 20) | (self.qie["153_1"] > 30) | (self.qie["166_1"] > 300)) & (~ g3) # Slope/intercept issue
+        #g5 = ((self.qie["186_1"] > 10) | (self.qie["187_1"] > 1.5)) & (~ g4) # Pedestal issue
+        #g6 = ((self.qie["10_1"] < 0.35) | (self.qie["93_1"] < 1.39) | (self.qie["93_1"] > 1.46)) & (~ g5) # Other
+        #g7 = ~ (g1 | g2 | g3 | g4 | g5 | g6) # everything else
 
         # Treat multiple measurement cuts in a different way
         to_combine_dict = defaultdict(list)
@@ -346,6 +346,9 @@ Also prints a table with yields"""
         
         # Make plot for the individual cuts, and prepare dictionary for the others
         for cname, series in self.qie.iteritems():
+            #if cname.split("_")[0] not in ["ChipID", "Sorting"]:
+            #    if int(cname.split("_")[0]) < 86 or int(cname.split("_")[0]) > 93:
+            #        continue
             if cname.split("_")[0] in to_combine:
                 to_combine_dict[cname.split("_")[0]].append(cname)
             else:
@@ -353,7 +356,7 @@ Also prints a table with yields"""
                 self.plotVarGroup(cname,series,mygroups,labels=mylabels)
                 print "Making plot for %s in fixed range mode" % (cname)
                 self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=False,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",

@@ -32,7 +32,7 @@ class QIEDataframe:
             with open(inputfile) as f:
                 location = None
                 if self.addLocation:
-                    location = open(inputfile.replace("qie11.dat.cuts_all","ChipLocationInfo.txt"))
+                    location = open(inputfile.replace("qie10.dat.cuts_all","ChipLocationInfo.txt"))
                 for line in f:
                     if "Chip Number" in line:
                         # write what was there

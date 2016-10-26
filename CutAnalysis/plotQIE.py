@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from collections import defaultdict
 import numpy as np
+import pandas as pd
 
 class PlotQIE:
     def __init__(self, df):
@@ -82,6 +83,12 @@ Also prints a table with yields"""
             groups.append(self.NotGroup(groups))
             labels.append("Good")
             yields.append(groups[-1].sum())
+
+            # temporary thing to find chip with bad tdc threshold
+            with pd.option_context('display.max_rows', 999):
+                print self.qie[groups[-2]].loc[:,["ChipID","63_1","64_1","65_1","66_1","67_1","68_1","69_1","70_1","71_1"]]
+            #print self.qie[self.qie["166_1"] > 600].loc[groups[-2],["ChipID","166_1"]]
+
             self.makeYieldsTable(yields, labels)
             # Add column to data frame containing "Good" (1), "bad" (0), "marginal" (2,..) info
             self.qie["Sorting"] = np.where(groups[-1], 1, 0)
@@ -210,6 +217,103 @@ Also prints a table with yields"""
         plt.savefig("%s/%s%s.pdf" % (self.outputdir, var, postfix))
         plt.clf()
 
+    def plotVarGroup_pub(self, var, series, groups=None, labels=None, postfix="", logy=True, fixedrange=False):
+        """Make plot for a given variable, and divide the chips in provided groups.
+'series' is a Series, i.e. a column"""
+        # split the variable name
+        varname = var.split("_")
+
+        # create the separate dataframes to plot from the provided groups
+        # Define some labels if we have groups but no provided labels
+        dfs = None
+        if groups:
+            # get the good chips, then all the other chips
+            dfs = [series.loc[groups[-1]],
+                   series.loc[~ groups[-1]]]
+            labels = ["Pass","Fail"]
+        else:
+            dfs = [series]
+
+        # Get right number of colors, and reverse them so that mediumpurple is 
+        # used for the bulk of the chips (assumed to be the last group)
+        colors = ['mediumpurple', 'orange']
+        
+        # Make the histogram
+        # Get the preferred binning and check whether all values fall within that range 
+        # If not, let pyplot pick the range. 
+        if varname[0] in cutinfo11:
+            nbins = cutinfo11[varname[0]][2]
+            xmin = cutinfo11[varname[0]][3]
+            xmax = cutinfo11[varname[0]][4]
+            series_min = series.min()
+            series_max = series.max()
+            if fixedrange or (series_min > xmin and series_max < xmax):
+                # Use the predefined ranges
+                print fixedrange, xmin, xmax
+                ax = plt.hist(dfs, bins=nbins, range=[xmin, xmax], stacked=True, 
+                              color=colors, label=labels, log=logy)
+            else:
+                print "auto scaling"
+                # Only use the number of bins from cutinfo11
+                ax = plt.hist(dfs, bins=nbins, stacked=True, 
+                              color=colors, label=labels, log=logy)
+        else:
+            # No info available, let pyplot deal with things, but use 20 bins
+            ax = plt.hist(dfs, bins=20, stacked=True, 
+                          color=colors, label=labels, log=logy)
+
+        # Set the axis titles (use cutinfo11 if available)
+        if varname[0] == "189":
+            plt.xlabel("Pedestal RMS (ADC)", fontsize=self.labelsize)
+        elif varname[0] == "152":
+            plt.xlabel("Bin width (fC)", fontsize=self.labelsize)
+        elif varname[0] in cutinfo11:
+            if len(varname) == 1:
+                plt.xlabel(cutinfo11[varname[0]][0], 
+                           fontsize=self.labelsize)
+            else:
+                plt.xlabel("%s ; %s" % (cutinfo11[varname[0]][0], varname[1]), 
+                           fontsize=self.labelsize)
+        else:
+            plt.xlabel(varname[0], 
+                       fontsize=self.labelsize)
+        plt.ylabel("Number of chips", fontsize=self.labelsize)
+
+        # set margins and format axis labels
+        x0, x1, y0, y1 = plt.axis()
+        if logy:
+            plt.axis((x0, x1,
+                      0.5, y1*1))
+        else:
+            plt.axis((x0, x1,
+                      0.5, y1*(1+0.2)))
+        ax = plt.gca()
+        ax.tick_params(labelsize=self.ticklabelsize)
+        plt.gcf().subplots_adjust(bottom=0.12)
+
+        # Add mean and std info
+        # Only use info on good chips, should be the last group in the list
+        mean = dfs[0].mean() #series.mean()
+        std = dfs[0].std() #series.std()
+        plt.figtext(0.2, 0.92,
+                    "Mean: %.3g     Std: %.3g     Std/Mean: %.3g"%(mean, std, std/mean),
+                    fontsize=self.ticklabelsize)
+
+        # Add cut lines if we have info
+        if self.cutfile != None and varname[0] in cutinfo11:
+            plt.axvline(x=self.cuts[varname[0]][2], linestyle='dashed', linewidth=2, color='grey')
+            plt.axvline(x=self.cuts[varname[0]][3], linestyle='dashed', linewidth=2, color='grey')
+            plt.axvline(x=self.cuts[varname[0]][0], linestyle='solid', linewidth=2, color='dimgrey')
+            plt.axvline(x=self.cuts[varname[0]][1], linestyle='solid', linewidth=2, color='dimgrey')
+
+        # Add legend if we have labels
+        if labels:
+            plt.legend(loc='best', ncol=1)
+
+        # Save figure
+        plt.savefig("%s/%s%s_pub.pdf" % (self.outputdir, var, postfix))
+        plt.clf()
+
     def plotMultipleVars(self, vars, series, groups=None, labels=None, postfix="",logy=True, fixedrange=False):
         """Make plot for the given variables, and divide the chips in provided groups.
 'series' is actually a Dataframe in this case, which will be stacked."""
@@ -313,7 +417,8 @@ Also prints a table with yields"""
                     g2 = gtemp
                 else:
                     g2 = g2 | gtemp
-        g2 = (g2 | (self.qie["196_33"] < 900) | (self.qie["196_5"] > 1200) | (self.qie["196_21"] > 1100) | (self.qie["196_22"] < 600)) & (~ g1)
+        #g2 = (g2 | (self.qie["196_33"] < 900) | (self.qie["196_5"] > 1200) | (self.qie["196_21"] > 1100) | (self.qie["196_22"] < 600)) & (~ g1)
+        g2 = (g2 | (self.qie["196_24"] < 650) | (self.qie["196_28"] > 1450) ) & (~ g1)
         g3 = ~(g1 | g2)
         with open("phases_bad_chips.txt",'w') as f:
             bad_chips = self.qie[~g3]["ChipID"]
@@ -347,16 +452,18 @@ Also prints a table with yields"""
         # Make plot for the individual cuts, and prepare dictionary for the others
         for cname, series in self.qie.iteritems():
             #if cname.split("_")[0] not in ["ChipID", "Sorting"]:
-            #    if int(cname.split("_")[0]) < 86 or int(cname.split("_")[0]) > 93:
-            #        continue
+            if cname.split("_")[0] not in ["189", "152"]:
+                #if int(cname.split("_")[0]) < 86 or int(cname.split("_")[0]) > 93:
+                continue
             if cname.split("_")[0] in to_combine:
                 to_combine_dict[cname.split("_")[0]].append(cname)
             else:
                 print "Making plot for %s" % (cname)
                 self.plotVarGroup(cname,series,mygroups,labels=mylabels)
                 print "Making plot for %s in fixed range mode" % (cname)
-                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=False,logy=False)
+#                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+#                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+                self.plotVarGroup_pub(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",
@@ -370,10 +477,10 @@ Also prints a table with yields"""
         # Use plotting function that takes in dataframe
         for k,v in to_combine_dict.iteritems():
             print "Making plot for %s" % (k)
-            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
+#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
             print "Making plot for %s in fixed range mode" % (k)
-            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",

@@ -31,6 +31,7 @@ class QIEDataframe:
         for inputfile in self.input:
             with open(inputfile) as f:
                 location = None
+                lastlocation = None
                 if self.addLocation:
                     location = open(inputfile.replace("qie10.dat.cuts_all","ChipLocationInfo.txt"))
                 for line in f:
@@ -50,19 +51,30 @@ class QIEDataframe:
                         entries+=1
                         # read in location info, assumes same ordering and no missing info
                         if self.addLocation:
-                            locinfo = location.readline()
+                            locinfo = lastlocation
+                            if lastlocation is None:
+                                locinfo = location.readline()
                             loclist = locinfo.strip().split("-")
                             if int(loclist[0]) != temp_dict["ChipID"]:
-                                print "Location (%s) doesn't match ChipID (%s)!" % (localist[0], temp_dict["ChipID"])
+                                print "Location (%s) doesn't match ChipID (%s)!" % (loclist[0], temp_dict["ChipID"])
+                                print "Assuming location is correct, so skipping to next chip"
+                                lastlocation = locinfo
+                                temp_dict = None
+                                continue
                             else:
                                 temp_dict["Tray"]   = int(loclist[1])
                                 temp_dict["Row"]    = int(loclist[2])
                                 temp_dict["Column"] = int(loclist[3])
+                                lastlocation = None
                     else:
                         if temp_dict != None:
                             # add to the dictionary
                             data = line.strip().split()
-                            temp_dict[data[0]].append(data[1]) 
+                            try:
+                                temp_dict[data[0]].append(data[1]) 
+                            except IndexError:
+                                print line
+                                raise
                 if self.addLocation:
                     location.close()
     
@@ -149,7 +161,7 @@ class QIEDataframe:
         if self.addLocation:
             # print out location info of hard failures
             hardfailuresdf = self.df[hardfailures]
-            hardfailuresdf["Sorting"] = 0
+            hardfailuresdf.loc[:,"Sorting"] = 0
             hardfailuresdf.to_csv("SortingAllHardFail.txt", columns=["ChipID","Tray","Row","Column","Sorting"],
                                 header=False, index=False)
         self.df = self.df.dropna(axis=0)

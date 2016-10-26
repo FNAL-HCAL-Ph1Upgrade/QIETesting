@@ -57,13 +57,14 @@ def pruneclusters(data, thresh=0.02, max_iterations=6):
 
 def getcorebounds(data, padding=0.1, **kwargs):
     core = pruneclusters(data, **kwargs)
+    #print data
     #print core[core>0.065]
     core_min = core.min()
     core_max = core.max()
     #width = (core_max - core_min) if (core_max - core_min > 0) else core_min*0.01
     std = core.std()
     extra = std if std > 0 else (core_min*0.002 if core_min > 0 else 1) #padding * width 
-    #print "min = %s, max = %s, extra = %s" % (core_min, core_max, extra)
+    print "min = %s, max = %s, extra = %s" % (core_min, core_max, extra)
     return (core_min-extra if (core_min-extra > 0 or core_min < 0) else 0, core_max+extra)
 
 def checkBounds(bound):
@@ -146,12 +147,12 @@ if __name__ == "__main__":
     
 
     # read file
-    df = pd.read_pickle("/Users/nstrobbe/Work/HCALPhase1/QIETesting/QIE11_2016/vWafer02/qie11.dat.cuts_all.pkl")
+    df = pd.read_pickle("/Users/nstrobbe/Work/HCALPhase1/QIETesting/QIE10_2016//TwoAndHalfTrays/qie10.dat.cuts_all.pkl")
     
     #columns = ["150_2","150_3"]
-    c = sys.argv[1]
+    c = sys.argv[1].split(",")
     #for c in columns:
-    df2 =  df[c].as_matrix().reshape((df.shape[0],1))
+    df2 =  df[c].stack().as_matrix().reshape((df.shape[0]*4,1))
     getcorebounds(df2)
     
     #doDBSCAN(df2)

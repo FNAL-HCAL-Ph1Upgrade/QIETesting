@@ -9,7 +9,7 @@ def readInput():
         info.extend(f.readlines())
     with open("SortingAllHardFail.txt") as g:
         info.extend(g.readlines())
-    return sorted(updateInput(info))
+    return sorted(updateInput(info), cmp=lambda x,y:cmp(int(x.split(",")[0]),int(y.split(",")[0])) )
 
 def updateInput(info):
     new_info = []

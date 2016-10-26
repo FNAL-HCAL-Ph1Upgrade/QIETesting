@@ -149,7 +149,8 @@ if __name__ == "__main__":
     # -------------------------------------------------
     # Step 5: Do possible further analysis, e.g.
     # -------------------------------------------------
-    #print qiedf[qiedf["10_1"]<0.35]
+    #print qiedf[qiedf["189_1"]>0.7]
+    #print qiedf.loc[range(1,20),"189_1"]
     #print qiedf[qiedf["107_1"]>1]
     #g1 = [11,12,16]
     #print "Printing weird rows\n", qiedf.loc[g1,:]

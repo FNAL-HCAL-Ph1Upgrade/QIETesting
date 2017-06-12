@@ -65,10 +65,10 @@ double PedAvgLo[13];
 double PedErrHi[13];
 double PedErrLo[13];
 
-double CAPPedDac[11];
-double CAPPedAvg[4][11];
-double CAPPedStd[4][11];
-double CAPPedErr[4][11];
+double CAPPedDac[15];
+double CAPPedAvg[4][15];
+double CAPPedStd[4][15];
+double CAPPedErr[4][15];
 
 //double CAPPedDacFit[11];
 //double CAPPedAvgFit[4][11];

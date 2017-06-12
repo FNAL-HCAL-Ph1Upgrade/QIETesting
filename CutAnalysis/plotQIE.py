@@ -418,7 +418,7 @@ Also prints a table with yields"""
                 else:
                     g2 = g2 | gtemp
         #g2 = (g2 | (self.qie["196_33"] < 900) | (self.qie["196_5"] > 1200) | (self.qie["196_21"] > 1100) | (self.qie["196_22"] < 600)) & (~ g1)
-        g2 = (g2 | (self.qie["196_24"] < 650) | (self.qie["196_28"] > 1450) ) & (~ g1)
+        g2 = (g2 | (self.qie["196_24"] < 650) | (self.qie["196_28"] > 1450) | (self.qie["196_28"] < 1000) | (self.qie["196_27"] < 1000) ) & (~ g1)
         g3 = ~(g1 | g2)
         with open("phases_bad_chips.txt",'w') as f:
             bad_chips = self.qie[~g3]["ChipID"]
@@ -461,8 +461,8 @@ Also prints a table with yields"""
                 print "Making plot for %s" % (cname)
                 self.plotVarGroup(cname,series,mygroups,labels=mylabels)
                 print "Making plot for %s in fixed range mode" % (cname)
-#                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-#                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+                self.plotVarGroup(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
                 self.plotVarGroup_pub(cname,series,mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
@@ -477,10 +477,10 @@ Also prints a table with yields"""
         # Use plotting function that takes in dataframe
         for k,v in to_combine_dict.iteritems():
             print "Making plot for %s" % (k)
-#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
+            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels)
             print "Making plot for %s in fixed range mode" % (k)
-#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
-#            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
+            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange",fixedrange=True)
+            self.plotMultipleVars(v, self.qie[v],mygroups,labels=mylabels,postfix="_fixedrange_linear",fixedrange=True,logy=False)
 #                                   [g1, g2, g3, g4, g5, g6, g7],
 #                                   labels=["Current issue",
 #                                           "Range transition",

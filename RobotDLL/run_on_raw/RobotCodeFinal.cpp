@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 
     if(argc > 2){
 	doPhaseTest(argv[1], argv[2]);
+	//doADCTest(argv[1], argv[2]);
     }
 }
 
@@ -410,6 +411,7 @@ bool  storePed(fstream &file) {
 
 	  CAPPEDtestRange[ped][CID][CAPPEDtestCount[ped][CID]] = (temp & 0x00C0)>>6;
 	  CAPPEDtestMant[ped][CID][CAPPEDtestCount[ped][CID]++] = temp & 0x003F;
+	  //cout << "Ped " << ped << ", read " << read << ", bla " << CAPPEDtestCount[ped][CID]  << ", range " << CAPPEDtestRange[ped][CID][CAPPEDtestCount[ped][CID]-1] << ", mantissa " << CAPPEDtestMant[ped][CID][CAPPEDtestCount[ped][CID]-1] << endl;
 
 	}
     }
@@ -713,6 +715,10 @@ int  doADCTest(string myfile, string outString) {
 	  Width[i][j][k] = LookupDAC(DownDAC[i][j][k+1], j) - LookupDAC(UpDAC[i][j][k+1], j);
 
 	  if(k<15) {
+	      if(i==0 && j==0){
+		  std::cout << UpDAC[i][j][k+1] << " " << DownDAC[i][j][k+1] << std::endl;
+		  std::cout << LookupDAC(UpDAC[i][j][k+1],j) << " " << LookupDAC(DownDAC[i][j][k+1],j) << std::endl;
+	      }
 	    SR0_mid[i][j][k] = (LookupDAC(UpDAC[i][j][k+1],j) + LookupDAC(DownDAC[i][j][k+1],j))/2;
 	  }
 	  else if(k<35) {
@@ -748,6 +754,11 @@ int  doADCTest(string myfile, string outString) {
 	  chisq[i][j][k] = 0;
 	}
 
+
+// input for the fitter
+  std::cout << "input to the fitter" << std::endl;
+  for (int i=0; i<15; i++)
+      std::cout << SR0_mid[0][0][i] << " " << std::endl;
   
   for (int i=0; i<4; i++) {
     for( int j=0; j<4; j++) {
@@ -760,6 +771,10 @@ int  doADCTest(string myfile, string outString) {
 
     }
   }
+
+  std::cout << "output of the fit" << std::endl;
+  std::cout << c0[0][0][0] << " " << c1[0][0][0] << std::endl;
+  
   
   for(int i=0; i<4; i++){
 
@@ -1082,44 +1097,63 @@ int  doPedTest(string myfile, string outString) {
 
   double Capcs0[4], Capcs1[4], Capcovs00[4], Capcovs01[4], Capcovs11[4], Capchisqs[4];  //appended "s" stands for "Sum"
 
-  for(int ped = 4; ped < 15; ped++) {
-    if(ped > 6) CAPPedDac[ped-4] = ped - 7;
-
-    if(ped == 4) CAPPedDac[ped-4] = -3;
-    if(ped == 5) CAPPedDac[ped-4] = -2;
-    if(ped == 6) CAPPedDac[ped-4] = -1;
-
-    if(ped > 6) testPed = ped;
-    else if(ped ==6) testPed = 0;
-    else if(ped ==5) testPed = 1;
-    else if(ped ==4) testPed = 2;
-
-    for(int i= 0; i <4; i++) {
-      CAPPedAvg[i][ped-4] = 0;
-
-      for(int read=0; read<CAPPEDtestCount[testPed][i]; read++) {
-	CAPPedAvg[i][ped-4] += CAPPEDtestRange[testPed][i][read]*64 + CAPPEDtestMant[testPed][i][read];
+  //for(int ped = 4; ped < 15; ped++) {
+  for(int ped = 0; ped < 15; ped++) {
+      CAPPedDac[ped] = ped;
+      if(ped < 7){
+	  CAPPedDac[ped] = 6 - ped;
+      } else {
+	  CAPPedDac[ped] = ped;
       }
-      CAPPedAvg[i][ped-4] /= CAPPEDtestCount[ped-4][i];
+      //outFile << "ped: " << ped << ", CAPPedDac: " << CAPPedDac[ped] << endl;
+      //outFile << ped << " ";
+      testPed = ped;
+      //if(ped > 6) CAPPedDac[ped-4] = ped - 7;
 
-      CAPPedStd[i][ped-4] = 0;
+      //if(ped == 4) CAPPedDac[ped-4] = -3;
+      //if(ped == 5) CAPPedDac[ped-4] = -2;
+      //if(ped == 6) CAPPedDac[ped-4] = -1;
 
-      for(int read=0; read<CAPPEDtestCount[testPed][i]; read++) {
-	CAPPedStd[i][ped-4] += pow((CAPPEDtestRange[testPed][i][read]*64 + CAPPEDtestMant[testPed][i][read]) - CAPPedAvg[i][ped-4],2);
+      //if(ped > 6) testPed = ped;
+      //else if(ped ==6) testPed = 0;
+      //else if(ped ==5) testPed = 1;
+      //else if(ped ==4) testPed = 2;
+
+      int p = 0;//4
+      for(int i= 0; i <4; i++) {
+	  CAPPedAvg[i][ped-p] = 0;
+	  
+	  for(int read=0; read<CAPPEDtestCount[testPed][i]; read++) 
+	  {
+	      CAPPedAvg[i][ped-p] += CAPPEDtestRange[testPed][i][read]*64 + CAPPEDtestMant[testPed][i][read];
+	  }
+	  CAPPedAvg[i][ped-p] /= CAPPEDtestCount[ped-p][i];
+
+	  CAPPedStd[i][ped-p] = 0;
+
+	  for(int read=0; read<CAPPEDtestCount[testPed][i]; read++) 
+	  {
+	      CAPPedStd[i][ped-p] += pow((CAPPEDtestRange[testPed][i][read]*64 + CAPPEDtestMant[testPed][i][read]) - CAPPedAvg[i][ped-p],2);
+	  }
+	  CAPPedStd[i][ped-p] /= CAPPEDtestCount[ped-p][i];
+	  CAPPedStd[i][ped-p] = sqrt(CAPPedStd[i][ped-p]);
+	  
+	  if(CAPPedStd[i][ped-p]==0) 
+	      CAPPedStd[i][ped-p] = 1/sqrt(12);
+	  
+	  CAPPedErr[i][ped-p] = 1/(pow(CAPPedStd[i][ped-p],2));
+	  //outFile << "avg, std, err: " << CAPPedAvg[i][ped-p] << " " << CAPPedStd[i][ped-p] << " " << CAPPedErr[i][ped-p] << endl;
+	  //if (i==0)
+	  //    outFile << " " << CAPPedAvg[i][ped-p] ;
       }
-      CAPPedStd[i][ped-4] /= CAPPEDtestCount[ped-4][i];
-      CAPPedStd[i][ped-4] = sqrt(CAPPedStd[i][ped-4]);
-
-      if(CAPPedStd[i][ped-4]==0) CAPPedStd[i][ped-4] = 1/sqrt(12);
-
-      CAPPedErr[i][ped-4] = 1/(pow(CAPPedStd[i][ped-4],2));
-    }
-
+      //outFile << endl;
   }
 
 
   for(int i=0; i < 4; i++ ) {
-      gsl_fit_wlinear(CAPPedDac, 1, CAPPedErr[i], 1, CAPPedAvg[i], 1, 11, &Capcs0[i], &Capcs1[i], &Capcovs00[i], &Capcovs01[i], &Capcovs11[i], &Capchisqs[i]);
+      //gsl_fit_linear(CAPPedDac, 1, CAPPedAvg[i], 1, sizeof(CAPPedDac), &Capcs0[i], &Capcs1[i], &Capcovs00[i], &Capcovs01[i], &Capcovs11[i], &Capchisqs[i]);
+      gsl_fit_wlinear(CAPPedDac, 1, CAPPedErr[i], 1, CAPPedAvg[i], 1, 15, &Capcs0[i], &Capcs1[i], &Capcovs00[i], &Capcovs01[i], &Capcovs11[i], &Capchisqs[i]);
+      outFile << "Fit result: " << Capcs0[i] << " " <<  Capcs1[i] << endl; 
 
     if(Capcs1[i] < 0) outFile << "188  0000" << endl;
     else if(Capcs1[i] > 65.5) outFile <<"188  FFFF" << endl;

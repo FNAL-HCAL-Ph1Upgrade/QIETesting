@@ -55,7 +55,7 @@ class QIEDataframe:
                             if lastlocation is None:
                                 locinfo = location.readline()
                             loclist = locinfo.strip().split("-")
-                            if int(loclist[0]) != temp_dict["ChipID"]:
+                            if loclist[0] == "" or int(loclist[0]) != temp_dict["ChipID"]:
                                 print "Location (%s) doesn't match ChipID (%s)!" % (loclist[0], temp_dict["ChipID"])
                                 print "Assuming location is correct, so skipping to next chip"
                                 lastlocation = locinfo
@@ -74,6 +74,8 @@ class QIEDataframe:
                                 temp_dict[data[0]].append(data[1]) 
                             except IndexError:
                                 print line
+                                print location
+                                print "ChipID", temp_dict["ChipID"]
                                 raise
                 if self.addLocation:
                     location.close()
